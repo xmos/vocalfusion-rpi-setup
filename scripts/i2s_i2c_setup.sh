@@ -2,7 +2,6 @@
 
 # Setup paths
 SCRIPTS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
-source $SCRIPTS_DIR/avs-config.sh
 
 # The working directory is the parent of the scripts
 I2S_ROOT=$(dirname $SCRIPTS_DIR)

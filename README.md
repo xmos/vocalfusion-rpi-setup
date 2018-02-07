@@ -10,7 +10,7 @@ This repository provides a simple-to-use automated script to configure the Raspb
 ## Prerequisites
 You will need:
 
-- **xCORE VocalFusion Stereo Dev Kit**: XK-VF3500-L33-AVS
+- **xCORE VocalFusion Stereo Dev Kit**: XK-VF3500-L33
 - Raspberry Pi 3
 - Micro-USB power supply (min. 2A)
 - MicroSD card (min. 16GB)
@@ -39,4 +39,4 @@ Wait for the script to complete the installation. This can several minutes.
 
 5. Enter `arecord -r 48000 -f S32_LE demo_test.wav` to run a demo recording. Press `Ctrl+C` stop recording at any time.
 
-Enter `aplay demo_test.wav` to play back the recording.
+6. Enter `aplay demo_test.wav` to play the recording.
