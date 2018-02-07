@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 SCRIPTS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"/scripts
 
-$SCRIPTS_DIR/i2s_i2c_setup-main.sh
+$SCRIPTS_DIR/i2s_i2c_setup.sh
 
 
 if [ -e /usr/share/alsa/pulse-alsa.conf ] ; then
