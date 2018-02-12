@@ -90,7 +90,7 @@ pcm.!default {
     capture.pcm {
         type plug
         slave {
-            pcm snoop_i2s_48k
+            pcm snoop_vol
         }
     }
 }
@@ -109,7 +109,7 @@ ctl.!default {
     capture.pcm {
         type plug
         slave {
-            pcm snoop_i2s_48k
+            pcm snoop_vol
         }
     }
 }
