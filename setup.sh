@@ -6,7 +6,7 @@ set -e
 set -u
 
 # The working directory
-RPI_SETUP_DIR = "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+RPI_SETUP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 #
 # Disable the built-in audio output so there is only one audio
