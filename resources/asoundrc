@@ -14,38 +14,15 @@ pcm.i2s_48k {
     rate 48000
 }
 
-ctl.i2s_48k {
-    type hw
-    card sndrpisimplecar
-    device 0
-}
-
-pcm.mix_i2s_48k {
+#
+# Mixing for playback and recording.
+# Allows multiple applications to access playback and recording simultaneously.
+#
+pcm.dmixer {
     type dmix
     ipc_key 115 # Must be unique
     slave {
         pcm i2s_48k
-    }
-}
-
-ctl.mix_i2s_48k {
-    type dmix
-    slave {
-        pcm i2s_48k
-    }
-}
-
-#
-# Note that the name must contain "Master" for the task bar to find it
-#
-pcm.mix_vol {
-    type softvol
-    slave {
-        pcm mix_i2s_48k
-    }
-    control {
-        name "Playback"
-        card 0
     }
 }
 
@@ -57,10 +34,17 @@ pcm.snoop_i2s_48k {
     }
 }
 
-ctl.snoop_i2s_48k {
-    type dsnoop
+#
+# Volume control for playback and recording.
+#
+pcm.mix_vol {
+    type softvol
     slave {
-        pcm i2s_48k
+        pcm dmixer
+    }
+    control {
+        name "Playback"
+        card sndrpisimplecar
     }
 }
 
@@ -71,7 +55,7 @@ pcm.snoop_vol {
     }
     control {
         name "Record"
-        card 0
+        card sndrpisimplecar
     }
 }
 
@@ -80,25 +64,6 @@ pcm.snoop_vol {
 #  - use plugs in order to support rate and format conversions.
 #
 pcm.!default {
-    type asym
-    playback.pcm {
-        type plug
-        slave {
-            pcm mix_vol
-        }
-    }
-    capture.pcm {
-        type plug
-        slave {
-            pcm snoop_vol
-        }
-    }
-}
-
-#
-# Create the control interfaces
-#
-ctl.!default {
     type asym
     playback.pcm {
         type plug

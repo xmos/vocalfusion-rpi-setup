@@ -116,6 +116,10 @@ echo "sudo sh -c 'echo "1 2 3 5 100 0 0 0" > /sys/class/i2c-gpio/add_bus'"      
 echo "# Remove the default i2c-gpio instance"                                      >> $i2c_driver_script
 echo "sudo sh -c 'echo 7 > /sys/class/i2c-gpio/remove_bus'"                        >> $i2c_driver_script
 
+echo "# Run Alsa at startup so that alsamixer configures"                          >> $i2c_driver_script
+echo "arecord -d 1 > /dev/null 2>&1"                                               >> $i2c_driver_script
+echo "aplay dummy > /dev/null 2>&1"                                                >> $i2c_driver_script
+
 #
 # Setup the crontab to restart I2S/I2C at reboot
 #
