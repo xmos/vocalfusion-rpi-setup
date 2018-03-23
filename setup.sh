@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Setup paths
-SCRIPTS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+SCRIPTS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"/scripts
 
 # The working directory is the parent of the scripts
 I2S_ROOT=$(dirname $SCRIPTS_DIR)
@@ -62,6 +62,12 @@ if [ -e ~/.asoundrc ] ; then
     chmod a+w ~/.asoundrc
 fi
 
+# Move existing files to back up
+if [ -e /usr/share/alsa/pulse-alsa.conf ] ; then
+    sudo mv /usr/share/alsa/pulse-alsa.conf  /usr/share/alsa/pulse-alsa.conf.bak
+    sudo mv ~/.config/lxpanel/LXDE-pi/panels/panel ~/.config/lxpanel/LXDE-pi/panels/panel.bak
+fi
+
 cp $I2S_ROOT/resources/asoundrc ~/.asoundrc
 cp $I2S_ROOT/resources/panel ~/.config/lxpanel/LXDE-pi/panels/panel
 
@@ -116,3 +122,6 @@ echo "sudo sh -c 'echo 7 > /sys/class/i2c-gpio/remove_bus'"                     
 echo "@reboot sh $i2s_driver_script"  > $I2S_ROOT/resources/crontab
 echo "@reboot sh $i2c_driver_script" >> $I2S_ROOT/resources/crontab
 crontab $I2S_ROOT/resources/crontab
+
+echo To enable the i2s device, this pi must now be rebooted
+echo type 'sudo reboot' below to do this
