@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-#let script exit if a command fails
-set -e
-#let script exit if an unsed variable is used
-set -u
-
 # The working directory
 RPI_SETUP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
