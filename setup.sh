@@ -20,26 +20,9 @@ sudo sh -c 'echo snd_soc_bcm2708     >> /etc/modules'
 sudo sh -c 'echo snd_soc_bcm2708_i2s >> /etc/modules'
 sudo sh -c 'echo bcm2708_dmaengine   >> /etc/modules'
 
-# Download kernal source - this will take some time
-cd $RPI_SETUP_DIR
-sudo apt-get -y install bc
-sudo apt-get -y install libncurses5-dev
-if [ ! -d rpi-source ] ; then
-    git clone git://github.com/notro/rpi-source.git
-fi
-pushd $RPI_SETUP_DIR/rpi-source > /dev/null
-python rpi-source --skip-gcc
-popd > /dev/null
+echo "Installing Raspberry Pi kernel headers"
+sudo apt-get install raspberrypi-kernel-headers
 
-#
-# Build simple sound card driver
-# Modify the driver source to have the correct BCLK ratio
-#
-pushd $RPI_SETUP_DIR/snd_driver > /dev/null
-cp ~/linux/sound/soc/generic/simple-card.c ./asoc_simple_card.c
-patch -p1 asoc_simple_card.c < bclk_patch.txt
-make
-popd > /dev/null
 
 #
 # Build loader and insert it into the kernel
@@ -118,5 +101,4 @@ echo "@reboot sh $i2s_driver_script"  > $RPI_SETUP_DIR/resources/crontab
 echo "@reboot sh $i2c_driver_script" >> $RPI_SETUP_DIR/resources/crontab
 crontab $RPI_SETUP_DIR/resources/crontab
 
-echo To enable the i2s device, this pi must now be rebooted
-echo type 'sudo reboot' below to do this
+echo "To enable I2S, this Raspberry Pi must be rebooted."
