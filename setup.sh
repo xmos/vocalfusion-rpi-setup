@@ -2,13 +2,6 @@
 pushd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null
 RPI_SETUP_DIR="$( pwd )"
 
-if [ $# -eq 0 ] ; then
-    echo "Error: No argument provided. Please rerun as:"
-    echo "setup.sh vf OR setup.sh vf_stereo"
-    popd > /dev/null
-    return 1
-fi
-
 # Disable the built-in audio output so there is only one audio
 # device in the system
 sudo sed -i -e 's/dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
@@ -48,9 +41,10 @@ if [ -e /usr/share/alsa/pulse-alsa.conf ] ; then
     sudo mv ~/.config/lxpanel/LXDE-pi/panels/panel ~/.config/lxpanel/LXDE-pi/panels/panel.bak
 fi
 
-if [ $1 = "vf" ] ; then
+# Check args for asoundrc selection. Default to VF Stereo.
+if [ $# -eq 1 ] && [ $1 = "vocalfusion" ] ; then
     cp $RPI_SETUP_DIR/resources/asoundrc_vf ~/.asoundrc
-elif [ $1 = "vf_stereo" ] ; then
+else
     cp $RPI_SETUP_DIR/resources/asoundrc_vf_stereo ~/.asoundrc
 fi
 
