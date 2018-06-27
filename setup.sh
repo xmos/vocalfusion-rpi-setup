@@ -2,6 +2,13 @@
 pushd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null
 RPI_SETUP_DIR="$( pwd )"
 
+if [ $# -eq 0 ] ; then
+    echo "Error: No argument provided. Please rerun as:"
+    echo "setup.sh vf OR setup.sh vf_stereo"
+    popd > /dev/null
+    return 1
+fi
+
 # Disable the built-in audio output so there is only one audio
 # device in the system
 sudo sed -i -e 's/dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
@@ -31,8 +38,8 @@ make
 popd > /dev/null
 
 if [ -e ~/.asoundrc ] ; then
-    cp ~/.asoundrc ~/.asoundrc.bak
     chmod a+w ~/.asoundrc
+    cp ~/.asoundrc ~/.asoundrc.bak
 fi
 
 # Move existing files to back up
@@ -41,9 +48,13 @@ if [ -e /usr/share/alsa/pulse-alsa.conf ] ; then
     sudo mv ~/.config/lxpanel/LXDE-pi/panels/panel ~/.config/lxpanel/LXDE-pi/panels/panel.bak
 fi
 
-cp $RPI_SETUP_DIR/resources/asoundrc ~/.asoundrc
-cp $RPI_SETUP_DIR/resources/panel ~/.config/lxpanel/LXDE-pi/panels/panel
+if [ $1 = "vf" ] ; then
+    cp $RPI_SETUP_DIR/resources/asoundrc_vf ~/.asoundrc
+elif [ $1 = "vf_stereo" ] ; then
+    cp $RPI_SETUP_DIR/resources/asoundrc_vf_stereo ~/.asoundrc
+fi
 
+cp $RPI_SETUP_DIR/resources/panel ~/.config/lxpanel/LXDE-pi/panels/panel
 
 # Make the asoundrc file read-only otherwise lxpanel rewrites it
 # as it doesn't support anything but a hardware type device
