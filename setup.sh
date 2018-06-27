@@ -31,8 +31,8 @@ make
 popd > /dev/null
 
 if [ -e ~/.asoundrc ] ; then
-    cp ~/.asoundrc ~/.asoundrc.bak
     chmod a+w ~/.asoundrc
+    cp ~/.asoundrc ~/.asoundrc.bak
 fi
 
 # Move existing files to back up
@@ -41,9 +41,14 @@ if [ -e /usr/share/alsa/pulse-alsa.conf ] ; then
     sudo mv ~/.config/lxpanel/LXDE-pi/panels/panel ~/.config/lxpanel/LXDE-pi/panels/panel.bak
 fi
 
-cp $RPI_SETUP_DIR/resources/asoundrc ~/.asoundrc
-cp $RPI_SETUP_DIR/resources/panel ~/.config/lxpanel/LXDE-pi/panels/panel
+# Check args for asoundrc selection. Default to VF Stereo.
+if [ $# -eq 1 ] && [ $1 = "vocalfusion" ] ; then
+    cp $RPI_SETUP_DIR/resources/asoundrc_vf ~/.asoundrc
+else
+    cp $RPI_SETUP_DIR/resources/asoundrc_vf_stereo ~/.asoundrc
+fi
 
+cp $RPI_SETUP_DIR/resources/panel ~/.config/lxpanel/LXDE-pi/panels/panel
 
 # Make the asoundrc file read-only otherwise lxpanel rewrites it
 # as it doesn't support anything but a hardware type device

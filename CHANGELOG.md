@@ -1,5 +1,10 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 1.2.0
+
+  * New ALSA configurations for both VocalFusion and VocalFusion Stereo devices.
+  * Optional setup.sh argument to specify VocalFusion ALSA configuration.
+
 ## 1.1.0
 
   * Updated I2C driver to be compatible with Linux Kernel v4.10.
