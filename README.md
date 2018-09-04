@@ -11,13 +11,24 @@ This repository provides a simple-to-use automated script to configure the Raspb
 
 1. Install **Raspbian Stretch** on the Raspberry Pi.
 
-2. Open a terminal on the Raspberry Pi and clone this repository:  
-`cd ~; git clone https://github.com/xmos/vocalfusion-rpi-setup`
+2. Ensure running kernel version matches headers kernel headers package. A typical system requires the following `--reinstall` command:
 
-3. For VocalFusion devices, run the installation script as follows: `source ~/vocalfusion-rpi-setup/setup.sh vocalfusion`.
+   ```sudo apt-get install --reinstall raspberrypi-bootloader raspberrypi-kernel```
 
-   For VocalFusion Stereo devices, run the installation script as follows: `source ~/vocalfusion-rpi-setup/setup.sh`.
+   followed by a reboot.
+
+3. Clone the Github repository https://github.com/xmos/vocalfusion-rpi-setup:
+
+   ```git clone https://github.com/xmos/vocalfusion-rpi-setup```
+
+4. For VocalFusion devices, run the installation script as follows:
+
+   ```./setup.sh vocalfusion```
+
+   For VocalFusion Stereo devices, run the installation script as follows:
+
+   ```./setup.sh```
 
    Wait for the script to complete the installation. This can take several minutes.
 
-4. Enter `sudo reboot` to reboot the Raspberry Pi and complete the setup.
+5. Reboot the Raspberry Pi.
