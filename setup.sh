@@ -9,18 +9,6 @@ sudo sed -i -e 's/dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
 # Enable the i2s device tree
 sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
 
-# Add modules to enable the I2C Peripherals and Direct Memory Access
-# Controller modules that the sound card driver depends on
-if ! grep -q "snd_soc_bcm2708" /etc/modules; then
-  sudo sh -c 'echo snd_soc_bcm2708     >> /etc/modules'
-fi
-if ! grep -q "snd_soc_bcm2708_i2s" /etc/modules; then
-  sudo sh -c 'echo snd_soc_bcm2708_i2s >> /etc/modules'
-fi
-if ! grep -q "bcm2708_dmaengine" /etc/modules; then
-  sudo sh -c 'echo bcm2708_dmaengine     >> /etc/modules'
-fi
-
 echo "Installing Raspberry Pi kernel headers"
 sudo apt-get install raspberrypi-kernel-headers
 
