@@ -78,7 +78,7 @@ fi
 
 # Build a new I2C driver
 pushd $RPI_SETUP_DIR/i2c-gpio-param > /dev/null
-make
+make || exit $?
 popd > /dev/null
 
 
