@@ -1,5 +1,11 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 1.2.1
+
+  * Remove BCM2708 modules that no longer exist in Stretch (#4)
+  * Stop on kernel module build error
+  * Require reinstall of kernel and firmware so kernel headers match running kernel version and we can build kernel modules (#6)
+
 ## 1.2.0
 
   * New ALSA configurations for both VocalFusion and VocalFusion Stereo devices.
