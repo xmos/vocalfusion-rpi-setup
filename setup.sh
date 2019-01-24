@@ -15,15 +15,19 @@ sudo apt-get install raspberrypi-kernel-headers
 
 # Build loader and insert it into the kernel
 pushd $RPI_SETUP_DIR/loader > /dev/null
-make
+if [ $# -ge 2 ] && [ $2 = "i2s_master" ] ; then
+    make i2s_master
+else
+    make
+fi
 popd > /dev/null
 
+
+# Move existing files to back up
 if [ -e ~/.asoundrc ] ; then
     chmod a+w ~/.asoundrc
     cp ~/.asoundrc ~/.asoundrc.bak
 fi
-
-# Move existing files to back up
 if [ -e /usr/share/alsa/pulse-alsa.conf ] ; then
     sudo mv /usr/share/alsa/pulse-alsa.conf  /usr/share/alsa/pulse-alsa.conf.bak
     sudo mv ~/.config/lxpanel/LXDE-pi/panels/panel ~/.config/lxpanel/LXDE-pi/panels/panel.bak
@@ -32,6 +36,8 @@ fi
 # Check args for asoundrc selection. Default to VF Stereo.
 if [ $# -eq 1 ] && [ $1 = "vocalfusion" ] ; then
     cp $RPI_SETUP_DIR/resources/asoundrc_vf ~/.asoundrc
+elif [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
+    cp $RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510 ~/.asoundrc
 else
     cp $RPI_SETUP_DIR/resources/asoundrc_vf_stereo ~/.asoundrc
 fi
@@ -49,10 +55,18 @@ sudo /etc/init.d/alsa-utils restart
 
 # Create the script to run after each reboot and make the soundcard available
 i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
-rm -f i2s_driver_script
+rm -f $i2s_driver_script
 echo "cd $RPI_SETUP_DIR"                          >> $i2s_driver_script
 echo "sudo insmod loader/loader.ko"               >> $i2s_driver_script
 
+if [ $# -ge 2 ] && [ $2 = "i2s_master" ] ; then
+    i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
+    rm -f $i2s_clk_dac_script
+    echo "sudo raspi-config nonint do_i2c 1"          >> $i2s_clk_dac_script
+    echo "sudo raspi-config nonint do_i2c 0"          >> $i2s_clk_dac_script
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk_bclk"  >> $i2s_clk_dac_script
+    echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"   >> $i2s_clk_dac_script
+fi
 
 # Configure the I2C - disable the default built-in driver
 sudo sed -i -e 's/#\?dtparam=i2c_arm=on/dtparam=i2c_arm=off/' /boot/config.txt
@@ -88,8 +102,11 @@ echo "aplay dummy > /dev/null 2>&1"                                             
 
 # Setup the crontab to restart I2S/I2C at reboot
 rm -f $RPI_SETUP_DIR/resources/crontab
-echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
-echo "@reboot sh $i2c_driver_script" >> $RPI_SETUP_DIR/resources/crontab
+echo "@reboot sh $i2s_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
+echo "@reboot sh $i2c_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
+if [ $# -ge 2 ] && [ $2 = "i2s_master" ] ; then
+    echo "@reboot sh $i2s_clk_dac_script" >> $RPI_SETUP_DIR/resources/crontab
+fi
 crontab $RPI_SETUP_DIR/resources/crontab
 
 echo "To enable I2S, this Raspberry Pi must be rebooted."
