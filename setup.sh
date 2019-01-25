@@ -14,11 +14,12 @@ sudo apt-get install raspberrypi-kernel-headers
 
 
 # Build loader and insert it into the kernel
-pushd $RPI_SETUP_DIR/loader > /dev/null
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
+    pushd $RPI_SETUP_DIR/loader/i2s_master > /dev/null
     make i2s_master
 else
-    make
+    pushd $RPI_SETUP_DIR/loader/i2s_slave > /dev/null
+    make i2s_slave
 fi
 popd > /dev/null
 
@@ -57,9 +58,17 @@ sudo /etc/init.d/alsa-utils restart
 i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
 rm -f $i2s_driver_script
 echo "cd $RPI_SETUP_DIR"                          >> $i2s_driver_script
-echo "sudo insmod loader/loader.ko"               >> $i2s_driver_script
+if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
+	echo "sudo insmod loader/i2s_master/loader.ko"               >> $i2s_driver_script
+else
+	echo "sudo insmod loader/i2s_slave/loader.ko"               >> $i2s_driver_script
+fi
+	
 
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
+    pushd $RPI_SETUP_DIR/resources/clk_dac_setup/ > /dev/null
+    make
+    popd > /dev/null
     i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
     rm -f $i2s_clk_dac_script
     echo "sudo raspi-config nonint do_i2c 1"          >> $i2s_clk_dac_script
