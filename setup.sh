@@ -15,7 +15,7 @@ sudo apt-get install raspberrypi-kernel-headers
 
 # Build loader and insert it into the kernel
 pushd $RPI_SETUP_DIR/loader > /dev/null
-if [ $# -ge 2 ] && [ $2 = "i2s_master" ] ; then
+if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     make i2s_master
 else
     make
@@ -59,7 +59,7 @@ rm -f $i2s_driver_script
 echo "cd $RPI_SETUP_DIR"                          >> $i2s_driver_script
 echo "sudo insmod loader/loader.ko"               >> $i2s_driver_script
 
-if [ $# -ge 2 ] && [ $2 = "i2s_master" ] ; then
+if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
     rm -f $i2s_clk_dac_script
     echo "sudo raspi-config nonint do_i2c 1"          >> $i2s_clk_dac_script
@@ -104,7 +104,7 @@ echo "aplay dummy > /dev/null 2>&1"                                             
 rm -f $RPI_SETUP_DIR/resources/crontab
 echo "@reboot sh $i2s_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
 echo "@reboot sh $i2c_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
-if [ $# -ge 2 ] && [ $2 = "i2s_master" ] ; then
+if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     echo "@reboot sh $i2s_clk_dac_script" >> $RPI_SETUP_DIR/resources/crontab
 fi
 crontab $RPI_SETUP_DIR/resources/crontab
