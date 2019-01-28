@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
 #else
     int clk_index = 2;
     int clk_source = 0;
-    int clk_mash = 0;
+    int clk_mash = 1;
     int clk_i = 162;
     int clk_f = 3112;
     int clk_enable = 0;
