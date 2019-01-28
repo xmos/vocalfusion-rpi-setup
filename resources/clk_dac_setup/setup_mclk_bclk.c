@@ -266,39 +266,37 @@ int main(int argc, char *argv[])
 
     if (gpioInitialise() < 0) return 1;
 
-    int mclk_index = 0;
-    int mclk_source = 0;
-    int mclk_mash = 1;
-    int mclk_i = 20;
-    int mclk_f = 1413;
-    int mclk_enable = 1;
+#ifdef MCLK
+    int clk_index = 0;
+    int clk_source = 0;
+    int clk_mash = 1;
+    int clk_i = 20;
+    int clk_f = 1413;
+    int clk_enable = 1;
 
     printf("MCLK: Using %s (I=%-4d F=%-4d MASH=%d)\n",
-            clocks[mclk_source], mclk_i, mclk_f, mclk_mash);
+            clocks[clk_source], clk_i, clk_f, clk_mash);
+#else
+    int clk_index = 2;
+    int clk_source = 0;
+    int clk_mash = 0;
+    int clk_i = 162;
+    int clk_f = 3112;
+    int clk_enable = 0;
 
-    if (initClock(mclk_index, mclk_source, mclk_i, mclk_f, mclk_mash, mclk_enable) < 0)
+    printf("CLK: Using %s (I=%-4d F=%-4d MASH=%d)\n",
+            clocks[clk_source], clk_i, clk_f, clk_mash);
+#endif //MCLK
+
+    if (initClock(clk_index, clk_source, clk_i, clk_f, clk_mash, clk_enable) < 0)
     {
       printf("Error initialising clock\n");
       exit(-1);
     }
 
+#ifdef MCLK
     gpioSetMode(4, PI_ALT0); //set GPCLK0 mode to alternate functionality
-
-    int bclk_index = 2;
-    int bclk_source = mclk_source;
-    int bclk_mash = mclk_mash;
-    int bclk_i = 162;
-    int bclk_f = 3112;
-    int bclk_enable = 0;
-
-    printf("BCLK: Using %s (I=%-4d F=%-4d MASH=%d)\n",
-            clocks[bclk_source], bclk_i, bclk_f, bclk_mash);
-
-    if (initClock(bclk_index, bclk_source, bclk_i, bclk_f, bclk_mash, bclk_enable) < 0)
-    {
-      printf("Error initialising clock\n");
-      exit(-1);
-    }
+#endif //MCLK
 
     //leave the clocks running and exit
     return 0;
