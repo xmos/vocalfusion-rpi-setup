@@ -73,7 +73,8 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     rm -f $i2s_clk_dac_script
     echo "sudo raspi-config nonint do_i2c 1"          >> $i2s_clk_dac_script
     echo "sudo raspi-config nonint do_i2c 0"          >> $i2s_clk_dac_script
-    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk_bclk"  >> $i2s_clk_dac_script
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"  >> $i2s_clk_dac_script
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"  >> $i2s_clk_dac_script
     echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"   >> $i2s_clk_dac_script
 fi
 
