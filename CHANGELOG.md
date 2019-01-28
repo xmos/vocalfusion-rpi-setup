@@ -1,5 +1,10 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 1.3.0
+
+  * Added support for XVF3510
+  * Modified I2S loader to be either master or slave
+
 ## 1.2.1
 
   * Remove BCM2708 modules that no longer exist in Stretch (#4)

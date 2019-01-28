@@ -29,6 +29,10 @@ This repository provides a simple-to-use automated script to configure the Raspb
 
    ```./setup.sh```
 
+   For XVF3510 devices, run the installation script as follows:
+
+   ```./setup.sh xvf3510```
+
    Wait for the script to complete the installation. This can take several minutes.
 
 5. Reboot the Raspberry Pi.
