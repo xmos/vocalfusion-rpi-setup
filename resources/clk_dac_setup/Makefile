@@ -1,6 +1,11 @@
+default: bclk mclk
 
-install: setup_mclk_bclk.c
-	gcc -g -o setup_mclk_bclk setup_mclk_bclk.c
+bclk: setup_mclk_bclk.c
+	gcc -g -o setup_bclk setup_mclk_bclk.c
+
+mclk: setup_mclk_bclk.c
+	gcc -g -o -BMCLK setup_mclk setup_mclk_bclk.c
 
 clean:
-	rm -f setup_mclk_bclk
+	rm -f setup_mclk
+	rm -f setup_bclk
