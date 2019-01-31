@@ -63,7 +63,7 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
 else
 	echo "sudo insmod loader/i2s_slave/loader.ko"               >> $i2s_driver_script
 fi
-	
+
 
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     pushd $RPI_SETUP_DIR/resources/clk_dac_setup/ > /dev/null
@@ -76,6 +76,7 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"  >> $i2s_clk_dac_script
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"  >> $i2s_clk_dac_script
     echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"   >> $i2s_clk_dac_script
+    echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf3510.py"   >> $i2s_clk_dac_script
 fi
 
 # Configure the I2C - disable the default built-in driver
