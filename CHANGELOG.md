@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 1.3.1
+
+  * Added reset for XVF3510
+
 ## 1.3.0
 
   * Added support for XVF3510
