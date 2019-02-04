@@ -85,7 +85,7 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
     rm -f $audacity_script
     echo "#!/usr/bin/env bash" >> $audacity_script
-    echo "audacity &" >> $audacity_script
+    echo "/usr/bin/audacity &" >> $audacity_script
     echo "sleep 5" >> $audacity_script
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null" >> $audacity_script
     sudo chmod +x $audacity_script
