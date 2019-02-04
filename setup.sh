@@ -88,7 +88,8 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     echo "audacity &" >> $audacity_script
     echo "sleep 5" >> $audacity_script
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null" >> $audacity_script
-    echo "alias audacity='sh $audacity_script &'" >> ~/.bashrc
+    sudo chmod +x $audacity_script
+    sudo mv $audacity_script /usr/local/bin/audacity
 fi
 
 # Configure the I2C - disable the default built-in driver
