@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 1.3.2
+
+  * Added audacity installation and setup for XVF3510
+
 ## 1.3.1
 
   * Added reset for XVF3510
