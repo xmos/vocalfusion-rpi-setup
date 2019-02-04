@@ -10,7 +10,8 @@ sudo sed -i -e 's/dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
 sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
 
 echo "Installing Raspberry Pi kernel headers"
-sudo apt-get install raspberrypi-kernel-headers
+sudo apt-get install -y raspberrypi-kernel-headers
+
 
 
 # Build loader and insert it into the kernel
@@ -77,6 +78,18 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"  >> $i2s_clk_dac_script
     echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"   >> $i2s_clk_dac_script
     echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf3510.py"   >> $i2s_clk_dac_script
+fi
+
+if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
+    sudo apt-get install -y audacity
+    audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
+    rm -f $audacity_script
+    echo "#!/usr/bin/env bash" >> $audacity_script
+    echo "/usr/bin/audacity &" >> $audacity_script
+    echo "sleep 5" >> $audacity_script
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null" >> $audacity_script
+    sudo chmod +x $audacity_script
+    sudo mv $audacity_script /usr/local/bin/audacity
 fi
 
 # Configure the I2C - disable the default built-in driver
