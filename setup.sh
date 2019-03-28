@@ -101,6 +101,10 @@ if ! grep -q "options i2c-bcm2708 combined=1" /etc/modprobe.d/i2c.conf; then
   sudo sh -c 'echo "options i2c-bcm2708 combined=1" >> /etc/modprobe.d/i2c.conf'
 fi
 
+# load i2c-dev module
+if ! grep -q "i2c-dev" /etc/modules; then
+  sudo sh -c 'echo "i2c-dev" >> /etc/modules'
+fi
 
 # Build a new I2C driver
 pushd $RPI_SETUP_DIR/i2c-gpio-param > /dev/null
@@ -113,11 +117,7 @@ i2c_driver_script=$RPI_SETUP_DIR/resources/load_i2c_gpio_driver.sh
 rm -f $i2c_driver_script
 echo "cd $RPI_SETUP_DIR/i2c-gpio-param"                                            >> $i2c_driver_script
 echo "# Load the i2c bit banged driver"                                            >> $i2c_driver_script
-echo "sudo insmod i2c-gpio-param.ko"                                               >> $i2c_driver_script
-echo "# Instantiate a driver at bus id=1 on same pins as hw i2c with 1sec timeout" >> $i2c_driver_script
-echo "sudo sh -c 'echo "1 2 3 5 100 0 0 0" > /sys/class/i2c-gpio/add_bus'"         >> $i2c_driver_script
-echo "# Remove the default i2c-gpio instance"                                      >> $i2c_driver_script
-echo "sudo sh -c 'echo 7 > /sys/class/i2c-gpio/remove_bus'"                        >> $i2c_driver_script
+echo "sudo insmod i2c-gpio-param.ko busid=1 sda=2 scl=3 udelay=5 timeout=100 sda_od=0 scl_od=0 scl_oo=0"    >> $i2c_driver_script
 
 echo "# Run Alsa at startup so that alsamixer configures"                          >> $i2c_driver_script
 echo "arecord -d 1 > /dev/null 2>&1"                                               >> $i2c_driver_script
