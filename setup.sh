@@ -4,7 +4,7 @@ RPI_SETUP_DIR="$( pwd )"
 
 # Disable the built-in audio output so there is only one audio
 # device in the system
-sudo sed -i -e 's/dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
+sudo sed -i -e 's/^dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
 
 # Enable the i2s device tree
 sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
@@ -12,7 +12,9 @@ sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
 echo "Installing Raspberry Pi kernel headers"
 sudo apt-get install -y raspberrypi-kernel-headers
 
-
+echo "Installing the Python3 packages"
+pip3 install matplotlib
+pip3 install numpy
 
 # Build loader and insert it into the kernel
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
@@ -63,6 +65,8 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
 	echo "sudo insmod loader/i2s_master/loader.ko"               >> $i2s_driver_script
 else
 	echo "sudo insmod loader/i2s_slave/loader.ko"               >> $i2s_driver_script
+    echo "sudo raspi-config nonint do_i2c 1"                    >> $i2s_driver_script
+    echo "sudo raspi-config nonint do_i2c 0"                    >> $i2s_driver_script
 fi
 
 
@@ -93,41 +97,24 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
 fi
 
 # Configure the I2C - disable the default built-in driver
-sudo sed -i -e 's/#\?dtparam=i2c_arm=on/dtparam=i2c_arm=off/' /boot/config.txt
-if ! grep -q "i2c-bcm2708" /etc/modules-load.d/modules.conf; then
-  sudo sh -c 'echo i2c-bcm2708 >> /etc/modules-load.d/modules.conf'
+sudo sed -i -e 's/#dtparam=i2c_arm=on/dtparam=i2c_arm=on/' /boot/config.txt
+sudo sed -i -e 's/dtparam=i2c_arm=off/dtparam=i2c_arm=on/' /boot/config.txt
+
+if ! grep -q "i2c-bcm2835" /etc/modules-load.d/modules.conf; then
+     sudo sh -c 'echo i2c-bcm2835 >> /etc/modules-load.d/modules.conf'
 fi
-if ! grep -q "options i2c-bcm2708 combined=1" /etc/modprobe.d/i2c.conf; then
-  sudo sh -c 'echo "options i2c-bcm2708 combined=1" >> /etc/modprobe.d/i2c.conf'
+if [ -d /etc/modprobe.d/i2c.conf ] ; then
+    if ! grep -q "options i2c-bcm2835" /etc/modprobe.d/i2c.conf; then
+        sudo sh -c 'echo "options i2c-bcm2835" >> /etc/modprobe.d/i2c.conf'
+    fi
+else
+    sudo sh -c 'echo "options i2c-bcm2835" >> /etc/modprobe.d/i2c.conf'
 fi
-
-
-# Build a new I2C driver
-pushd $RPI_SETUP_DIR/i2c-gpio-param > /dev/null
-make || exit $?
-popd > /dev/null
-
-
-# Create script to insert module into the kernel
-i2c_driver_script=$RPI_SETUP_DIR/resources/load_i2c_gpio_driver.sh
-rm -f $i2c_driver_script
-echo "cd $RPI_SETUP_DIR/i2c-gpio-param"                                            >> $i2c_driver_script
-echo "# Load the i2c bit banged driver"                                            >> $i2c_driver_script
-echo "sudo insmod i2c-gpio-param.ko"                                               >> $i2c_driver_script
-echo "# Instantiate a driver at bus id=1 on same pins as hw i2c with 1sec timeout" >> $i2c_driver_script
-echo "sudo sh -c 'echo "1 2 3 5 100 0 0 0" > /sys/class/i2c-gpio/add_bus'"         >> $i2c_driver_script
-echo "# Remove the default i2c-gpio instance"                                      >> $i2c_driver_script
-echo "sudo sh -c 'echo 7 > /sys/class/i2c-gpio/remove_bus'"                        >> $i2c_driver_script
-
-echo "# Run Alsa at startup so that alsamixer configures"                          >> $i2c_driver_script
-echo "arecord -d 1 > /dev/null 2>&1"                                               >> $i2c_driver_script
-echo "aplay dummy > /dev/null 2>&1"                                                >> $i2c_driver_script
-
 
 # Setup the crontab to restart I2S/I2C at reboot
-rm -f $RPI_SETUP_DIR/resources/crontab
+#  rm -f $RPI_SETUP_DIR/resources/crontab
 echo "@reboot sh $i2s_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
-echo "@reboot sh $i2c_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
+#  echo "@reboot sh $i2c_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     echo "@reboot sh $i2s_clk_dac_script" >> $RPI_SETUP_DIR/resources/crontab
 fi
