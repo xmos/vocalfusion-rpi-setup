@@ -16,6 +16,10 @@ sudo raspi-config nonint do_i2c 0
 echo "Installing Raspberry Pi kernel headers"
 sudo apt-get install -y raspberrypi-kernel-headers
 
+
+echo "Installing necessary packages for dev kit"
+sudo apt-get -y install libusb-1.0-0-dev libreadline-dev libncurses-dev libatlas-base-dev
+
 echo "Installing the Python3 packages"
 pip3 install matplotlib
 pip3 install numpy
