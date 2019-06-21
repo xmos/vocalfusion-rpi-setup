@@ -9,16 +9,18 @@ sudo sed -i -e 's/^dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
 # Enable the i2s device tree
 sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
 
+# Enable the I2C device_tree
+sudo sed -i -e 's/#dtparam=i2c_arm=on/dtparam=i2c_arm=on/' /boot/config.txt
+sudo sed -i -e 's/dtparam=i2c_arm=off/dtparam=i2c_arm=on/' /boot/config.txt
+# Lower the I2C baudrate from 100k to 40k
+sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on,i2c_arm_baudrate=40000/' /boot/config.txt
+
 # Enable the I2C support
 sudo raspi-config nonint do_i2c 1
 sudo raspi-config nonint do_i2c 0
 
 echo "Installing Raspberry Pi kernel headers"
 sudo apt-get install -y raspberrypi-kernel-headers
-
-
-echo "Installing necessary packages for dev kit"
-sudo apt-get -y install libusb-1.0-0-dev libreadline-dev libncurses-dev libatlas-base-dev
 
 echo "Installing the Python3 packages"
 pip3 install matplotlib
@@ -100,38 +102,9 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     sudo mv $audacity_script /usr/local/bin/audacity
 fi
 
-# Configure the I2C - use the default HW module
-sudo sed -i -e 's/#dtparam=i2c_arm=on/dtparam=i2c_arm=on/' /boot/config.txt
-sudo sed -i -e 's/dtparam=i2c_arm=off/dtparam=i2c_arm=on/' /boot/config.txt
 
-if grep -q "^Revision.*d3$" /proc/cpuinfo ; then
-   echo "Load I2C module for Pi model 3b+"
-   if ! grep -q "i2c-bcm2835" /etc/modules-load.d/modules.conf; then
-        sudo sh -c 'echo i2c-bcm2835 >> /etc/modules-load.d/modules.conf'
-   fi
-   if [ -d /etc/modprobe.d/i2c.conf ] ; then
-       if ! grep -q "options i2c-bcm2835" /etc/modprobe.d/i2c.conf; then
-            sudo sh -c 'echo "options i2c-bcm2835" >> /etc/modprobe.d/i2c.conf'
-       fi
-   else
-       sudo sh -c 'echo "options i2c-bcm2835" >> /etc/modprobe.d/i2c.conf'
-   fi
-else
-   echo "Load I2C module for Pi model 3b and before"
-   if ! grep -q "i2c-bcm2708" /etc/modules-load.d/modules.conf; then
-        sudo sh -c 'echo i2c-bcm2708 >> /etc/modules-load.d/modules.conf'
-   fi
-   if [ -d /etc/modprobe.d/i2c.conf ] ; then
-       if ! grep -q "options i2c-bcm2708 combined=1" /etc/modprobe.d/i2c.conf; then
-            sudo sh -c 'echo "options i2c-bcm2708 combined=1" >> /etc/modprobe.d/i2c.conf'
-       fi
-   else
-       sudo sh -c 'echo "options i2c-bcm2708 combined=1" >> /etc/modprobe.d/i2c.conf'
-   fi
-fi
-
-# Setup the crontab to restart I2S/I2C at reboot
-#  rm -f $RPI_SETUP_DIR/resources/crontab
+# Setup the crontab to restart I2S and clocks at reboot
+rm -f $RPI_SETUP_DIR/resources/crontab
 echo "@reboot sh $i2s_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
 #  echo "@reboot sh $i2c_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
