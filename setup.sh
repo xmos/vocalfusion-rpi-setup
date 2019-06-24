@@ -103,7 +103,7 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
 fi
 
 
-# Setup the crontab to restart I2S and clocks at reboot
+# Setup the crontab to restart I2S/I2C at reboot
 rm -f $RPI_SETUP_DIR/resources/crontab
 echo "@reboot sh $i2s_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
 #  echo "@reboot sh $i2c_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
