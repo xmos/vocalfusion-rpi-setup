@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 2.0.0
+
+  * Removed use of I2C drivers
+
 ## 1.3.2
 
   * Added audacity installation and setup for XVF3510
