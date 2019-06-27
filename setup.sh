@@ -70,13 +70,17 @@ sudo /etc/init.d/alsa-utils restart
 # Create the script to run after each reboot and make the soundcard available
 i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
 rm -f $i2s_driver_script
-echo "cd $RPI_SETUP_DIR"                          >> $i2s_driver_script
+echo "cd $RPI_SETUP_DIR"    >> $i2s_driver_script
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-	echo "sudo insmod loader/i2s_master/loader.ko"               >> $i2s_driver_script
+	echo "sudo insmod loader/i2s_master/loader.ko"  >> $i2s_driver_script
 else
-	echo "sudo insmod loader/i2s_slave/loader.ko"               >> $i2s_driver_script
+	echo "sudo insmod loader/i2s_slave/loader.ko"   >> $i2s_driver_script
 fi
 
+
+echo "# Run Alsa at startup so that alsamixer configures"   >> $i2s_driver_script	
+echo "arecord -d 1 > /dev/null 2>&1"                        >> $i2s_driver_script	
+echo "aplay dummy > /dev/null 2>&1"                         >> $i2s_driver_script
 
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     pushd $RPI_SETUP_DIR/resources/clk_dac_setup/ > /dev/null
@@ -84,9 +88,9 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     popd > /dev/null
     i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
     rm -f $i2s_clk_dac_script
-    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"  >> $i2s_clk_dac_script
-    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"  >> $i2s_clk_dac_script
-    echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"   >> $i2s_clk_dac_script
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"           >> $i2s_clk_dac_script
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"           >> $i2s_clk_dac_script
+    echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"       >> $i2s_clk_dac_script
     echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf3510.py"   >> $i2s_clk_dac_script
 fi
 
@@ -97,7 +101,7 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     echo "#!/usr/bin/env bash" >> $audacity_script
     echo "/usr/bin/audacity &" >> $audacity_script
     echo "sleep 5" >> $audacity_script
-    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null" >> $audacity_script
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null"  >> $audacity_script
     sudo chmod +x $audacity_script
     sudo mv $audacity_script /usr/local/bin/audacity
 fi
@@ -105,9 +109,9 @@ fi
 
 # Setup the crontab to restart I2S at reboot
 rm -f $RPI_SETUP_DIR/resources/crontab
-echo "@reboot sh $i2s_driver_script"  >> $RPI_SETUP_DIR/resources/crontab
+echo "@reboot sh $i2s_driver_script"    >> $RPI_SETUP_DIR/resources/crontab
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-    echo "@reboot sh $i2s_clk_dac_script" >> $RPI_SETUP_DIR/resources/crontab
+    echo "@reboot sh $i2s_clk_dac_script"   >> $RPI_SETUP_DIR/resources/crontab
 fi
 crontab $RPI_SETUP_DIR/resources/crontab
 
