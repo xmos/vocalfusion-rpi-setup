@@ -9,19 +9,13 @@ sudo sed -i -e 's/^dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
 # Enable the i2s device tree
 sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
 
-# Enable the I2C device_tree
-sudo sed -i -e 's/.*dtparam=i2c_arm=.*/dtparam=i2c_arm=on/' /boot/config.txt
-
-# Lower the I2C baudrate from 100k to 10k
-sudo sed -i -r 's/^i2c_arm_baudrate/d' /boot/config.txt
-sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on,i2c_arm_baudrate=10000/' /boot/config.txt
-sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on,i2c_arm_baudrate=10000/' /boot/config.txt
-
-sleep 0.1
-
-# Enable the I2C support
+# Enable the I2C device tree
 sudo raspi-config nonint do_i2c 1
 sudo raspi-config nonint do_i2c 0
+
+# Lower the I2C baudrate from 100k to 10k
+sudo sed -i -e '/^dtparam=i2c_arm_baudrate/d' /boot/config.txt
+sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on,i2c_arm_baudrate=10000/' /boot/config.txt
 
 echo "Installing Raspberry Pi kernel headers"
 sudo apt-get install -y raspberrypi-kernel-headers
