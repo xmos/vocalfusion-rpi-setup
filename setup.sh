@@ -12,8 +12,6 @@ sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
 # Enable the I2C device_tree
 sudo sed -i -e 's/#dtparam=i2c_arm=on/dtparam=i2c_arm=on/' /boot/config.txt
 sudo sed -i -e 's/dtparam=i2c_arm=off/dtparam=i2c_arm=on/' /boot/config.txt
-# Lower the I2C baudrate from 100k to 40k
-sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on,i2c_arm_baudrate=40000/' /boot/config.txt
 
 # Enable the I2C support
 sudo raspi-config nonint do_i2c 1
