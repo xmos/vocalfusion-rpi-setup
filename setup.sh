@@ -13,9 +13,9 @@ sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
 sudo raspi-config nonint do_i2c 1
 sudo raspi-config nonint do_i2c 0
 
-# Lower the I2C baudrate from 100k to 10k
+# Set the I2C baudrate to 100k
 sudo sed -i -e '/^dtparam=i2c_arm_baudrate/d' /boot/config.txt
-sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on\ndtparam=i2c_arm_baudrate=10000/' /boot/config.txt
+sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on\ndtparam=i2c_arm_baudrate=100000/' /boot/config.txt
 
 echo "Installing Raspberry Pi kernel headers"
 sudo apt-get install -y raspberrypi-kernel-headers
