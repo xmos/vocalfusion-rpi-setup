@@ -2,7 +2,8 @@
 
 ## 2.0.0
 
-  * Removed use of I2C drivers
+  * Use default I2C hardware
+  * Add installation of Py3 packages
 
 ## 1.3.2
 
