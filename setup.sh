@@ -20,9 +20,11 @@ sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on\ndtparam=i2c_arm_baudra
 echo "Installing Raspberry Pi kernel headers"
 sudo apt-get install -y raspberrypi-kernel-headers
 
-echo "Installing the Python3 packages"
-pip3 install matplotlib
-pip3 install numpy
+echo "Installing the Python3 packages and related libs"
+sudo apt-get install python3-matplotlib
+sudo apt-get install python3-numpy
+sudo apt-get install libatlas-base-dev
+
 
 # Build loader and insert it into the kernel
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
