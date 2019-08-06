@@ -25,10 +25,12 @@ echo "Installing Raspberry Pi kernel headers"
 sudo apt-get install -y raspberrypi-kernel-headers
 
 echo "Installing the Python3 packages and related libs"
-sudo apt-get install python3-matplotlib
-sudo apt-get install python3-numpy
-sudo apt-get install libatlas-base-dev
+sudo apt-get install -y python3-matplotlib
+sudo apt-get install -y python3-numpy
+sudo apt-get install -y libatlas-base-dev
 
+echo  "Installing necessary packages for dev kit"
+sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev
 
 # Build loader and insert it into the kernel
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then

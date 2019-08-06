@@ -3,6 +3,7 @@
 ## 2.1.0
 
   * Enable SPI interface
+  * Add installation of packages for dev kit
 
 ## 2.0.0
 
