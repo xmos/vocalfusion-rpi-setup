@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 2.1.0
+
+  * Enable SPI interface
+
 ## 2.0.0
 
   * Use default I2C hardware

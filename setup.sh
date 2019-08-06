@@ -17,6 +17,10 @@ sudo raspi-config nonint do_i2c 0
 sudo sed -i -e '/^dtparam=i2c_arm_baudrate/d' /boot/config.txt
 sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on\ndtparam=i2c_arm_baudrate=100000/' /boot/config.txt
 
+# Enable the SPI support
+sudo raspi-config nonint do_spi 1
+sudo raspi-config nonint do_spi 0
+
 echo "Installing Raspberry Pi kernel headers"
 sudo apt-get install -y raspberrypi-kernel-headers
 
@@ -115,6 +119,6 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
 fi
 crontab $RPI_SETUP_DIR/resources/crontab
 
-echo "To enable I2S and I2C, this Raspberry Pi must be rebooted."
+echo "To enable I2S, I2C and SPI, this Raspberry Pi must be rebooted."
 
 popd > /dev/null
