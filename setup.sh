@@ -57,7 +57,7 @@ fi
 if [ $# -eq 1 ] && [ $1 = "vocalfusion" ] ; then
     cp $RPI_SETUP_DIR/resources/asoundrc_vf ~/.asoundrc
 elif [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-    cp $RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510 ~/.asoundrc
+    cp $RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_i2s ~/.asoundrc
 else
     cp $RPI_SETUP_DIR/resources/asoundrc_vf_stereo ~/.asoundrc
 fi

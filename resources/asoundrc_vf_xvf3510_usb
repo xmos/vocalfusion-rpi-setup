@@ -1,0 +1,117 @@
+# Recording
+
+pcm.dsnoopy {
+  type dsnoop
+  ipc_key 1121
+  slave {
+    pcm "hw:Adaptive,0"
+    rate 16000
+    channels 2
+  }
+  bindings {
+    0 0
+    1 1
+  }
+}
+
+pcm.left {
+  type plug
+  slave {
+    pcm "dsnoopy"
+    channels 2
+  }
+  ttable.0.0 1
+  ttable.1.0 1
+}
+
+pcm.right {
+  type plug
+  slave {
+    pcm "dsnoopy"
+    channels 2
+  }
+  ttable.0.1 1
+  ttable.1.1 1
+}
+
+# Playing
+
+# Change this to change the speaker device
+# See /proc/asound/cards to find the hw:name
+pcm.dmix_default {
+  type dmix
+  ipc_key 67891
+  ipc_key_add_uid 0
+  slave {
+    pcm "hw:Example"
+    channels 2
+  }
+}
+
+# Using the 'plug' plugin automatically converts between
+# different rates/ channel counts
+pcm.plug_xvf3510 {
+  type plug
+  slave {
+    pcm {
+      type dmix
+      ipc_key 12346
+      ipc_key_add_uid 0
+      slave {
+        pcm "hw:Adaptive"
+        channels 2
+      }
+    }
+  }
+}
+
+# 4 channel virtual device:
+# a combination of speakers and the xvf3510
+pcm.multi {
+  type multi
+  slaves.a {
+    pcm "plug_xvf3510"
+    channels 2
+  }
+  slaves.b {
+    pcm "dmix_default"
+    channels 2
+  }
+  bindings.0.slave b
+  bindings.0.channel 0
+  bindings.1.slave b
+  bindings.1.channel 1
+  bindings.2.slave a
+  bindings.2.channel 0
+  bindings.3.slave a
+  bindings.3.channel 1
+}
+
+# Virtual device to output left and right channels to
+# the correct channels in the multi device
+pcm.both {
+    type route
+    slave.pcm "multi"
+    ttable.0.0 1
+    ttable.1.1 1
+    ttable.0.2 1
+    ttable.1.3 1
+}
+
+pcm.!default {
+  type asym
+  playback.pcm {
+    type plug
+    slave.pcm "both"
+   }
+   capture.pcm {
+     type plug
+     slave.pcm "left"
+   }
+}
+
+# Use controls for sound card 0 to adjust the audio volume
+ctl.!default {
+        type hw
+        card 0
+}
