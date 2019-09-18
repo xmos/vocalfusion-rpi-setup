@@ -1,0 +1,43 @@
+#!/bin/bash
+
+pushd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null
+# resources/bin
+pushd ../../ >/dev/null
+RPI_SETUP_DIR="$( pwd )"
+
+# Move existing files to back up
+if [ -e ~/.asoundrc ] ; then
+    cp ~/.asoundrc ~/.asoundrc.bak
+fi
+
+if [ $# -ge 1 ] && [ $1 = "usb" ] ; then
+    echo "Switching xvf3510 audio setup to USB mode..."
+    chmod a+w ~/.asoundrc
+    cp $RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_usb ~/.asoundrc
+    chmod a-w ~/.asoundrc
+    echo "Note: Ensure that the ribbon cable is UNPLUGGED before evaluation."
+elif [ $# -ge 1 ] && [ $1 = "i2s" ] ; then
+    echo "Switching xvf3510 audio setup to I2S mode..."
+    chmod a+w ~/.asoundrc
+    cp $RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_i2s ~/.asoundrc
+    chmod a-w ~/.asoundrc
+    echo "Note: Ensure that the ribbon cable is PLUGGED IN before evaluation."
+else
+    echo "Usage:"
+    echo "$0 usb"
+    echo "or:"
+    echo "$0 i2s"
+    echo ""
+    echo "Changes sound settings to switch between xvf3510 USB/I2S firmware."
+    exit 1
+fi
+
+if [ -e /usr/share/alsa/pulse-alsa.conf ] ; then
+    sudo mv /usr/share/alsa/pulse-alsa.conf  /usr/share/alsa/pulse-alsa.conf.bak
+    sudo mv ~/.config/lxpanel/LXDE-pi/panels/panel ~/.config/lxpanel/LXDE-pi/panels/panel.bak
+fi
+
+# Restart ALSA
+sudo /etc/init.d/alsa-utils restart
+
+echo "Done."

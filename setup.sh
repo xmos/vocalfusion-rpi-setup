@@ -125,6 +125,9 @@ if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
 fi
 crontab $RPI_SETUP_DIR/resources/crontab
 
+# Add xvf3510ctl to the PATH
+echo "export PATH=\"$RPI_SETUP_DIR/resources/bin:\$PATH\"" >> $HOME/.bash_profile
+
 echo "To enable I2S, I2C and SPI, this Raspberry Pi must be rebooted."
 
 popd > /dev/null
