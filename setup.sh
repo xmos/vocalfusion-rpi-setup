@@ -2,6 +2,14 @@
 pushd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null
 RPI_SETUP_DIR="$( pwd )"
 
+if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
+    # If script has xvf3510 arg, keep built-in audio enabled.
+else
+    # Disable the built-in audio output so there is only one audio
+    # device in the system
+    sudo sed -i -e 's/^dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
+fi
+
 # Enable the i2s device tree
 sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
 
