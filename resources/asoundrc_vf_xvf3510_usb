@@ -43,7 +43,7 @@ pcm.dmix_default {
   ipc_key 67891
   ipc_key_add_uid 0
   slave {
-    pcm "hw:Example"
+    pcm "hw:sndrpisimplecar"
     channels 2
   }
 }

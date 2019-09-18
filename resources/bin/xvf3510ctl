@@ -24,9 +24,9 @@ elif [ $# -ge 1 ] && [ $1 = "i2s" ] ; then
     echo "Note: Ensure that the ribbon cable is PLUGGED IN before evaluation."
 else
     echo "Usage:"
-    echo "$0 usb"
+    echo "$(basename $0) usb"
     echo "or:"
-    echo "$0 i2s"
+    echo "$(basename $0) i2s"
     echo ""
     echo "Changes sound settings to switch between xvf3510 USB/I2S firmware."
     exit 1
@@ -40,4 +40,4 @@ fi
 # Restart ALSA
 sudo /etc/init.d/alsa-utils restart
 
-echo "Done."
+echo "Reboot for changes to take effect."
