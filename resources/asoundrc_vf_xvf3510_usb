@@ -1,11 +1,31 @@
+#
+# The I2S hardware device. Refer to it by name as it will not always
+# be the same card number in every system.
+#
+pcm.i2s_48k {
+    type hw
+    card sndrpisimplecar
+    device 0
+    format S32_LE
+    channels 2
+    rate 48000
+}
+
+# The USB hardware device.
+pcm.xvf3510_hw {
+    type hw
+    card "Adaptive"
+    device 0
+    channels 2
+    rate 48000
+}
 # Recording
 
 pcm.dsnoopy {
   type dsnoop
   ipc_key 1121
   slave {
-    pcm "hw:Adaptive,0"
-    rate 16000
+    pcm "xvf3510_hw"
     channels 2
   }
   bindings {
@@ -43,8 +63,7 @@ pcm.dmix_default {
   ipc_key 67891
   ipc_key_add_uid 0
   slave {
-    pcm "hw:sndrpisimplecar"
-    channels 2
+    pcm "i2s_48k"
   }
 }
 
@@ -58,8 +77,7 @@ pcm.plug_xvf3510 {
       ipc_key 12346
       ipc_key_add_uid 0
       slave {
-        pcm "hw:Adaptive"
-        channels 2
+        pcm "xvf3510_hw"
       }
     }
   }
