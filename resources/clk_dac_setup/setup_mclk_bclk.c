@@ -295,7 +295,18 @@ int main(int argc, char *argv[])
     }
 
 #ifdef MCLK
-    gpioSetMode(4, PI_ALT0); //set GPCLK0 mode to alternate functionality
+    unsigned mclk_mode =  PI_ALT0; //set GPCLK0 mode to alternate functionality (clock)
+
+    if (argc > 1){
+        if (!strcmp(argv[1], "--disable")){
+            mclk_mode = PI_INPUT; //set GPCLK0 mode to input pin (switch clock off)
+	    printf("Disabling MCLK output\n");
+	}
+	else{
+	    printf("unknown option %s\n", argv[1]);
+	}
+    }
+    gpioSetMode(4, mclk_mode);
 #endif //MCLK
 
     //leave the clocks running and exit
