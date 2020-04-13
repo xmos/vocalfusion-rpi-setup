@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 2.2.0
+
+  * Support runtime disabling of MCLK drive to allow for I2S role change
+
 ## 2.1.0
 
   * Enable SPI interface
