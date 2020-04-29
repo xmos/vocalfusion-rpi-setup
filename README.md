@@ -8,13 +8,15 @@ This repository provides a simple-to-use automated script to configure the Raspb
 - xCORE VocalFusion 4-Mic Kit for AVS: https://github.com/xmos/vocalfusion-avs-setup
 
 This setup will perform the following operations:
+
 - enable the I2S, I2C and SPI interfaces
 - install the Raspberry Pi kernel headers
 - install the required packages
 - compile the I2S drivers
 - add a cron job to load the I2S drivers at boot up
 
-For XVF3510 devices these steps will be done as well:
+For XVF3510 devices these actions will be done as well:
+
 - configure MCLK at 24576kHz from pin 4
 - configure I2S BCLK at 3072kHz from pin 12
 - update the alias for Audacity
