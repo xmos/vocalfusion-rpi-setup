@@ -17,8 +17,8 @@ This setup will perform the following operations:
 
 For XVF3510 devices these actions will be done as well:
 
-- configure MCLK at 24576kHz from pin 4
-- configure I2S BCLK at 3072kHz from pin 12
+- configure MCLK at 24576kHz from pin 7 (BCM 4)
+- configure I2S BCLK at 3072kHz from pin 12 (BCM18)
 - update the alias for Audacity
 - add a cron job to reset the device at boot up
 - add a cron job to configure the DAC at boot up
