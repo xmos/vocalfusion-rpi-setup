@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
     if (argc > 1){
         if (!strcmp(argv[1], "16000")){
 	    i2s_16000 = 1; 
-	    printf("USing LRCLK 16000Hz\n");
+	    printf("Using LRCLK of 16000Hz\n");
 	}
 	else{
 	    printf("unknown option %s\n", argv[1]);
