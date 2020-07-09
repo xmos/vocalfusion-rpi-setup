@@ -277,11 +277,30 @@ int main(int argc, char *argv[])
     printf("MCLK: Using %s (I=%-4d F=%-4d MASH=%d)\n",
             clocks[clk_source], clk_i, clk_f, clk_mash);
 #else
+    int i2s_16000 = 0;
+    if (argc > 1){
+        if (!strcmp(argv[1], "16000")){
+	    i2s_16000 = 1; 
+	    printf("Using LRCLK of 16000Hz\n");
+	}
+	else{
+	    printf("unknown option %s\n", argv[1]);
+	}
+    }
+    else{
+        printf("Using LRCLK 48000Hz\n");
+    }
+
     int clk_index = 2;
     int clk_source = 0;
     int clk_mash = 1;
     int clk_i = 162;
     int clk_f = 3112;
+    if(i2s_16000)
+    {
+	    clk_i = 488;
+	    clk_f = 1144;
+    }
     int clk_enable = 0;
 
     printf("CLK: Using %s (I=%-4d F=%-4d MASH=%d)\n",

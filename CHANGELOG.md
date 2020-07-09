@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 2.3.0
+
+  * Add support for 16kHz BCLK generation
+
 ## 2.2.0
 
   * Support runtime disabling of MCLK drive to allow for I2S role change
