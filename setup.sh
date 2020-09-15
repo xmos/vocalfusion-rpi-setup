@@ -77,10 +77,14 @@ sudo /etc/init.d/alsa-utils restart
 i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
 rm -f $i2s_driver_script
 echo "cd $RPI_SETUP_DIR"    >> $i2s_driver_script
+
+# the pause below is strictly needed only for Buster on RPi3
+echo "sleep 5"  >> $i2s_driver_script
+
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-	echo "sudo insmod loader/i2s_master/loader.ko"  >> $i2s_driver_script
+    echo "sudo insmod loader/i2s_master/loader.ko"  >> $i2s_driver_script
 else
-	echo "sudo insmod loader/i2s_slave/loader.ko"   >> $i2s_driver_script
+    echo "sudo insmod loader/i2s_slave/loader.ko"   >> $i2s_driver_script
 fi
 
 
