@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
     int clk_i = 162;
     int clk_f = 3112;
     // Handle the case for RPi4B
-    // values obtained using "python3 compute_clock_dividers.py 750000 3072"
+    // values obtained using "python3 compute_clock_dividers.py 750000 24576"
     if (revision == 0x3) {
         clk_i = 244;
         clk_f = 576;
