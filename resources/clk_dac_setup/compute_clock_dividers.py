@@ -25,7 +25,7 @@ if __name__ == "__main__":
                         help="Source clock frequency in kHz")
 
     parser.add_argument('desired_mclock_khz',
-                        help="Desired frequency of MCLKC in kHz")
+                        help="Desired frequency of MCLK in kHz")
 
     args = parser.parse_args()
 
