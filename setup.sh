@@ -32,13 +32,23 @@ sudo apt-get install -y libatlas-base-dev
 echo  "Installing necessary packages for dev kit"
 sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev
 
-# Build loader and insert it into the kernel
+# Build I2S kernel module
+PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
+RPI4B_FLAG=""
+if [ $PI_MODEL == "4" ] ; then
+    RPI4B_FLAG="-DRPI_4B"
+fi
+
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     pushd $RPI_SETUP_DIR/loader/i2s_master > /dev/null
-    make i2s_master
+    make CFLAGS_MODULE='-DI2S_MASTER $(RPI4B_FLAG)'
 else
     pushd $RPI_SETUP_DIR/loader/i2s_slave > /dev/null
-    make i2s_slave
+    make CFLAGS_MODULE='-DRPI_4 $(RPI4B_FLAG)'
+fi
+if [ $? -ne 0 ]; then
+    echo "Error: I2S kernel module build failed"
+    exit 1
 fi
 popd > /dev/null
 
