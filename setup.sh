@@ -41,15 +41,19 @@ fi
 
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     pushd $RPI_SETUP_DIR/loader/i2s_master > /dev/null
-    make CFLAGS_MODULE='-DI2S_MASTER $(RPI4B_FLAG)'
+    I2S_MASTER_FLAG="-DI2S_MASTER"
 else
     pushd $RPI_SETUP_DIR/loader/i2s_slave > /dev/null
-    make CFLAGS_MODULE='-DRPI_4 $(RPI4B_FLAG)'
+    I2S_MASTER_FLAG=""
 fi
+CMD="make CFLAGS_MODULE='$I2S_MASTER_FLAG $RPI4B_FLAG'"
+echo $CMD
+eval $CMD
 if [ $? -ne 0 ]; then
     echo "Error: I2S kernel module build failed"
     exit 1
 fi
+
 popd > /dev/null
 
 
