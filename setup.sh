@@ -92,8 +92,11 @@ i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
 rm -f $i2s_driver_script
 echo "cd $RPI_SETUP_DIR"    >> $i2s_driver_script
 
-# the pause below is strictly needed only for Buster on RPi3
-echo "sleep 5"  >> $i2s_driver_script
+# Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
+# According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
+# this bit is set after 2 PCM clocks have occurred.
+# To avoid this issue we add a 1-second delay before the drivers are loaded
+echo "sleep 1"  >> $i2s_driver_script
 
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     echo "sudo insmod loader/i2s_master/loader.ko"  >> $i2s_driver_script
