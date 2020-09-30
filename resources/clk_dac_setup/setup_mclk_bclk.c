@@ -153,15 +153,18 @@ unsigned gpioHardwareRevision(void)
     switch (hw_rev)  /* just interested in BCM model */
     {
         case 0x0:   /* BCM2835 (Raspberry Pi 1 and Zero) */
+            printf("Raspberry Pi 1 / Zero detected\n");
             piPeriphBase = 0x20000000;
-             break;
+            break;
 
         case 0x1:   /* BCM2836 (Raspberry Pi 2)*/
         case 0x2:   /* BCM2837 (Raspberry Pi 3)*/
+            printf("Raspberry Pi 2 / 3 detected\n");
             piPeriphBase = 0x3F000000;
             break;
 
         case 0x3:   /* BCM2711 (Raspberry Pi 4B)*/
+            printf("Raspberry Pi 4 detected\n");
             piPeriphBase = 0xFE000000;
             break;
 
@@ -282,14 +285,15 @@ int main(int argc, char *argv[])
     int clk_mash = 1;
 
     // dividers used in the formula: output_clock = source_clock / (clk_i + clk_f/4096)
-    int clk_i = 20;
-    int clk_f = 1413;
+    // values obtained using "python3 compute_clock_dividers.py 500000 12288"
+    int clk_i = 40;
+    int clk_f = 2826;
 
     // Handle the case for RPi4B:
-    // values obtained using "python3 compute_clock_dividers.py 750000 24576"
+    // values obtained using "python3 compute_clock_dividers.py 750000 12288"
     if (revision == 0x3) {
-       clk_i = 30;
-       clk_f = 2120;
+       clk_i = 61;
+       clk_f = 144;
     }
 
     int clk_enable = 1;
@@ -315,21 +319,24 @@ int main(int argc, char *argv[])
     int clk_index = 2;
     int clk_source = 0;
     int clk_mash = 1;
+    // values obtained using "python3 compute_clock_dividers.py 500000 12288"
     int clk_i = 162;
     int clk_f = 3112;
     // Handle the case for RPi4B
-    // values obtained using "python3 compute_clock_dividers.py 750000 24576"
     if (revision == 0x3) {
+        // values obtained using "python3 compute_clock_dividers.py 750000 12288"
         clk_i = 244;
         clk_f = 576;
     }
 
     if(i2s_16000)
     {
+        // values obtained using "python3 compute_clock_dividers.py 750000 12288"
         clk_i = 488;
         clk_f = 1144;
         // Handle the case for RPi4B
         if (revision == 0x3) {
+            // values obtained using "python3 compute_clock_dividers.py 750000 12288"
             clk_i = 732;
             clk_f = 1728;
         }

@@ -1,23 +1,12 @@
 import argparse
 
 def compute_dividers(source_clock_khz, output_clock_khz):
-    diff = 1000
-    final_div_i = 0;
-    final_div_f = 0;
-    final_output_clock_khz = 0
     div_i = int(source_clock_khz / output_clock_khz)
-    for div_f in range(0, 4096):
-        computed_output_clock_khz = float(source_clock_khz)*1000/(div_i + div_f/4096)/1000
-        new_diff = abs(computed_output_clock_khz - float(output_clock_khz))
-        # search for the minimum difference between the desired frequency and the one achievable with the dividers
-        if new_diff < diff:
-            diff = new_diff
-            final_div_i = div_i
-            final_div_f = div_f
-            final_output_clock_khz = computed_output_clock_khz
-            if diff == 0:
-                break
-    return [final_output_clock_khz, final_div_i, final_div_f]
+    div_f = int(((source_clock_khz / output_clock_khz) - div_i) * 4096)
+
+    final_output_clock_khz = float(source_clock_khz)*1000/(div_i + div_f/4096)/1000
+
+    return [final_output_clock_khz, div_i, div_f]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -27,7 +16,7 @@ if __name__ == "__main__":
     parser.add_argument('desired_mclock_khz', type=int,
                         help="Desired frequency of MCLK in kHz")
 
-    parser.add_argument('--mclk_pdm_clk_divider', '-d', type=int, default=2, choices=[1, 2],
+    parser.add_argument('--mclk_pdm_clk_divider', '-d', type=int, default=1, choices=[1, 2],
                         help="XCore divider from input master clock to 6.144MHz DDR PDM microphone clock")
 
     args = parser.parse_args()
@@ -51,8 +40,8 @@ if __name__ == "__main__":
     if int(args.desired_mclock_khz) != mclk_khz:
         print(f"Warning: perfect value for MCLK couldn't be found: expected {args.desired_mclock_khz}, found  {mclk_khz}\n")
     if desired_bclk_48khz != bclk_48khz:
-        print(f"Warning: perfect value for BCLK at 48kHz couldn't be found: expected {desired_bclk_48khz}, found  {desired_bclk_48khz}\n")
+        print(f"Warning: perfect value for BCLK at 48kHz couldn't be found: expected {desired_bclk_48khz}, found  {bclk_48khz}\n")
     if desired_bclk_16khz != bclk_16khz:
-        print(f"Warning: perfect value for BCLK at 16kHz couldn't be found: expected {desired_bclk_16khz}, found  {desired_bclk_16khz}")
+        print(f"Warning: perfect value for BCLK at 16kHz couldn't be found: expected {desired_bclk_16khz}, found  {bclk_16khz}")
 
 
