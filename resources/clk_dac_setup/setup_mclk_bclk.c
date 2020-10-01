@@ -31,32 +31,11 @@
 
 static volatile uint32_t piPeriphBase = 0x20000000;
 
-#define SYST_BASE  (piPeriphBase + 0x003000)
-#define DMA_BASE   (piPeriphBase + 0x007000)
 #define CLK_BASE   (piPeriphBase + 0x101000)
 #define GPIO_BASE  (piPeriphBase + 0x200000)
-#define UART0_BASE (piPeriphBase + 0x201000)
-#define PCM_BASE   (piPeriphBase + 0x203000)
-#define SPI0_BASE  (piPeriphBase + 0x204000)
-#define I2C0_BASE  (piPeriphBase + 0x205000)
-#define PWM_BASE   (piPeriphBase + 0x20C000)
-#define BSCS_BASE  (piPeriphBase + 0x214000)
-#define UART1_BASE (piPeriphBase + 0x215000)
-#define I2C1_BASE  (piPeriphBase + 0x804000)
-#define I2C2_BASE  (piPeriphBase + 0x805000)
-#define DMA15_BASE (piPeriphBase + 0xE05000)
 
-#define DMA_LEN   0x1000 /* allow access to all channels */
 #define CLK_LEN   0xA8
 #define GPIO_LEN  0xB4
-#define SYST_LEN  0x1C
-#define PCM_LEN   0x24
-#define PWM_LEN   0x28
-#define I2C_LEN   0x1C
-
-#define SYST_CS  0
-#define SYST_CLO 1
-#define SYST_CHI 2
 
 #define CLK_PASSWD  (0x5A<<24)
 
@@ -70,7 +49,7 @@ static volatile uint32_t piPeriphBase = 0x20000000;
 
 #define CLK_CTL_SRC_OSC  1  /* 19.2 MHz */
 #define CLK_CTL_SRC_PLLC 5  /* 1000 MHz */
-#define CLK_CTL_SRC_PLLD 6  /*  500 MHz */
+#define CLK_CTL_SRC_PLLD 6  /*  500 MHz for RPi 3, 750 MHz for RPi 4*/
 #define CLK_CTL_SRC_HDMI 7  /*  216 MHz */
 
 #define CLK_DIV_DIVI(x) ((x)<<12)
@@ -89,9 +68,13 @@ static volatile uint32_t piPeriphBase = 0x20000000;
 #define CLK_PWM_CTL 40
 #define CLK_PWM_DIV 41
 
+/* Hardware revision codes */
+#define HW_REVISION_RPI1_ZERO	0x00
+#define HW_REVISION_RPI2      	0x01
+#define HW_REVISION_RPI3 	0x02
+#define HW_REVISION_RPI4 	0x03
 
 static volatile uint32_t  *gpioReg = MAP_FAILED;
-static volatile uint32_t  *systReg = MAP_FAILED;
 static volatile uint32_t  *clkReg  = MAP_FAILED;
 
 
@@ -117,7 +100,7 @@ void gpioSetMode(unsigned gpio, unsigned mode)
 }
 
 
-unsigned gpioHardwareRevision(void)
+unsigned getGpioHardwareRevision(void)
 {
     static unsigned rev = 0;
 
@@ -150,29 +133,6 @@ unsigned gpioHardwareRevision(void)
         return -1;
     }
     unsigned hw_rev = (rev >> 12) & 0xF;
-    switch (hw_rev)  /* just interested in BCM model */
-    {
-        case 0x0:   /* BCM2835 (Raspberry Pi 1 and Zero) */
-            printf("Raspberry Pi 1 / Zero detected\n");
-            piPeriphBase = 0x20000000;
-            break;
-
-        case 0x1:   /* BCM2836 (Raspberry Pi 2)*/
-        case 0x2:   /* BCM2837 (Raspberry Pi 3)*/
-            printf("Raspberry Pi 2 / 3 detected\n");
-            piPeriphBase = 0x3F000000;
-            break;
-
-        case 0x3:   /* BCM2711 (Raspberry Pi 4B)*/
-            printf("Raspberry Pi 4 detected\n");
-            piPeriphBase = 0xFE000000;
-            break;
-
-        default:
-            fprintf(stderr, "unsupported rev code (%x)", rev);
-            return -2;
-            break;
-    }
     return hw_rev;
 }
 
@@ -247,13 +207,11 @@ unsigned gpioInitialise(void)
     }
 
     gpioReg  = initMapMem(fd, GPIO_BASE, GPIO_LEN);
-    systReg  = initMapMem(fd, SYST_BASE, SYST_LEN);
     clkReg   = initMapMem(fd, CLK_BASE,  CLK_LEN);
 
     close(fd);
 
     if ((gpioReg == MAP_FAILED) ||
-        (systReg == MAP_FAILED) ||
         (clkReg == MAP_FAILED))
     {
         fprintf(stderr, "Bad, mmap failed\n");
@@ -266,16 +224,36 @@ unsigned gpioInitialise(void)
 int main(int argc, char *argv[])
 {
     char *clocks[CLK_SRCS]={"PLLD", " OSC", "HDMI", "PLLC"};
-    unsigned revision = gpioHardwareRevision(); /* sets piModel, needed for peripherals address */
+    unsigned hw_rev = getGpioHardwareRevision(); 
+    
+    /* set peripherals address */
+    switch (hw_rev)
+    {
 
-    if (revision < 0) return 1;
+        case HW_REVISION_RPI2:   /* BCM2836 (Raspberry Pi 2)*/
+        case HW_REVISION_RPI3:   /* BCM2837 (Raspberry Pi 3)*/
+            printf("Raspberry Pi 2 / 3 detected\n");
+            piPeriphBase = 0x3F000000;
+            break;
+
+        case HW_REVISION_RPI4:   /* BCM2711 (Raspberry Pi 4B)*/
+            printf("Raspberry Pi 4 detected\n");
+            piPeriphBase = 0xFE000000;
+            break;
+
+        default:
+            fprintf(stderr, "unsupported hardware revision code (%x)", hw_rev);
+            return 1;
+            break;
+    }
+
 
     if (gpioInitialise() < 0) return 1;
 
     unsigned source_clk_kHz = 500000;
     // Handle the case for RPi4B:
     // PLLD clock used as source is 750MHz
-    if (revision == 0x3) {
+    if (hw_rev == HW_REVISION_RPI4) {
        source_clk_kHz = 750000;
     }
 
@@ -291,7 +269,7 @@ int main(int argc, char *argv[])
 
     // Handle the case for RPi4B:
     // values obtained using "python3 compute_clock_dividers.py 750000 12288"
-    if (revision == 0x3) {
+    if (hw_rev == HW_REVISION_RPI4) {
        clk_i = 61;
        clk_f = 144;
     }
@@ -323,7 +301,7 @@ int main(int argc, char *argv[])
     int clk_i = 162;
     int clk_f = 3112;
     // Handle the case for RPi4B
-    if (revision == 0x3) {
+    if (hw_rev == HW_REVISION_RPI4) {
         // values obtained using "python3 compute_clock_dividers.py 750000 12288"
         clk_i = 244;
         clk_f = 576;
@@ -335,7 +313,7 @@ int main(int argc, char *argv[])
         clk_i = 488;
         clk_f = 1144;
         // Handle the case for RPi4B
-        if (revision == 0x3) {
+        if (hw_rev == HW_REVISION_RPI4) {
             // values obtained using "python3 compute_clock_dividers.py 750000 12288"
             clk_i = 732;
             clk_f = 1728;
