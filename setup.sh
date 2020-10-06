@@ -99,9 +99,9 @@ echo "cd $RPI_SETUP_DIR"    >> $i2s_driver_script
 echo "sleep 1"  >> $i2s_driver_script
 
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-    echo "sudo insmod loader/i2s_master/loader.ko"  >> $i2s_driver_script
+    echo "sudo insmod loader/i2s_master/i2s_master_loader.ko"  >> $i2s_driver_script
 else
-    echo "sudo insmod loader/i2s_slave/loader.ko"   >> $i2s_driver_script
+    echo "sudo insmod loader/i2s_slave/i2s_slave_loader.ko"   >> $i2s_driver_script
 fi
 
 
