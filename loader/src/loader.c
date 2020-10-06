@@ -30,7 +30,7 @@ void device_release_callback(struct device *dev) { /* do nothing */ };
 #ifdef I2S_MASTER
     #define SND_SOC_DAIFMT_CBS_FLAG SND_SOC_DAIFMT_CBS_CFS
 #else
-    #define SND_SOC_DAIFMT_CBS_FLAG SND_SOC_DAIFMT_CBS_CFM
+    #define SND_SOC_DAIFMT_CBS_FLAG SND_SOC_DAIFMT_CBM_CFM
 #endif
 
 static struct asoc_simple_card_info snd_rpi_simple_card_info = {
