@@ -1,5 +1,13 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 3.0.0
+
+  * Update clock dividers for RPi3 to generate a 12.288MHz clock, since the RPi4 clock at 24.576MHz has glitches
+  * Add support for RPi4 on I2S loader kernel module
+  * Add delay in loading I2S drivers needed for Buster on RPi3
+  * Add script compute_clock_dividers.py to compute dividers for MCLK and BCLK
+  * Fix some indentations and general tidy up
+
 ## 2.3.0
 
   * Add support for 16kHz BCLK generation

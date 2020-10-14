@@ -32,14 +32,28 @@ sudo apt-get install -y libatlas-base-dev
 echo  "Installing necessary packages for dev kit"
 sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev
 
-# Build loader and insert it into the kernel
+# Build I2S kernel module
+PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
+RPI4B_FLAG=""
+if [ $PI_MODEL == "4" ] ; then
+    RPI4B_FLAG="-DRPI_4B"
+fi
+
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
     pushd $RPI_SETUP_DIR/loader/i2s_master > /dev/null
-    make i2s_master
+    I2S_MASTER_FLAG="-DI2S_MASTER"
 else
     pushd $RPI_SETUP_DIR/loader/i2s_slave > /dev/null
-    make i2s_slave
+    I2S_MASTER_FLAG=""
 fi
+CMD="make CFLAGS_MODULE='$I2S_MASTER_FLAG $RPI4B_FLAG'"
+echo $CMD
+eval $CMD
+if [ $? -ne 0 ]; then
+    echo "Error: I2S kernel module build failed"
+    exit 1
+fi
+
 popd > /dev/null
 
 
@@ -77,10 +91,17 @@ sudo /etc/init.d/alsa-utils restart
 i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
 rm -f $i2s_driver_script
 echo "cd $RPI_SETUP_DIR"    >> $i2s_driver_script
+
+# Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
+# According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
+# this bit is set after 2 PCM clocks have occurred.
+# To avoid this issue we add a 1-second delay before the drivers are loaded
+echo "sleep 1"  >> $i2s_driver_script
+
 if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-	echo "sudo insmod loader/i2s_master/loader.ko"  >> $i2s_driver_script
+    echo "sudo insmod loader/i2s_master/i2s_master_loader.ko"  >> $i2s_driver_script
 else
-	echo "sudo insmod loader/i2s_slave/loader.ko"   >> $i2s_driver_script
+    echo "sudo insmod loader/i2s_slave/i2s_slave_loader.ko"   >> $i2s_driver_script
 fi
 
 
