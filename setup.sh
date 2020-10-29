@@ -68,6 +68,7 @@ case $XMOS_DEVICE in
   xvf3500|xvf3100)
     I2S_BUILD_DIR=$RPI_SETUP_DIR/loader/i2s_slave
     I2S_MASTER_FLAG=""
+    ;;
   *)
     echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
     exit 1
