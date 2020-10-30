@@ -59,27 +59,31 @@ sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev
 
 # Build I2S kernel module
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
-RPI4B_FLAG=""
 if [[ $PI_MODEL = 4 ]]; then
-    RPI4B_FLAG="-DRPI_4B"
+  I2S_MODULE_CFLAGS="-DRPI_4B"
+  SEP=" "
 fi
 
 case $XMOS_DEVICE in
   xvf3510)
-    I2S_BUILD_DIR=$RPI_SETUP_DIR/loader/i2s_master
-    I2S_MASTER_FLAG="-DI2S_MASTER"
+    I2S_MODE=master
+    I2S_MODULE_CFLAGS="$MODULE_CFLAGS$EP-DI2S_MASTER"
     ;;
   xvf3500|xvf3100)
-    I2S_BUILD_DIR=$RPI_SETUP_DIR/loader/i2s_slave
-    I2S_MASTER_FLAG=""
+    I2S_MODE=slave
     ;;
   *)
     echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
     exit 1
   ;;
 esac
+I2S_BUILD_DIR=$RPI_SETUP_DIR/loader/i2s_$I2S_MODE
 pushd $I2S_BUILD_DIR > /dev/null
-CMD="make CFLAGS_MODULE='$I2S_MASTER_FLAG $RPI4B_FLAG'"
+if [[ -n "$I2S_MODULE_CFLAGS" ]]; then
+  CMD="make CFLAGS_MODULE='$I2S_MODULE_CFLAGS'"
+else
+  CMD=make
+fi
 echo $CMD
 eval $CMD
 if [[ $? -ne 0 ]]; then
