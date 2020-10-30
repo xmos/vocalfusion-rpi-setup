@@ -12,13 +12,17 @@ else
   exit 1
 fi
 # Validate XMOS device
-for d in $VALID_XMOS_DEVICES; do
-  if [[ "$d" = $XMOS_DEVICE ]]; then
-    DEVICE_IS_VALID=y
-    break
-  fi
-done
-if [[ -z "$DEVICE_IS_VALID" ]]; then
+validate_device() {
+  local DEV=$1
+  shift
+  for d in $*; do
+    if [[ "$d" = $XMOS_DEVICE ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+if ! validate_device $XMOS_DEVICE $VALID_XMOS_DEVICES; then
   echo error: $XMOS_DEVICE is not a valid device type.
   exit 1
 fi
