@@ -122,11 +122,9 @@ cp $RPI_SETUP_DIR/resources/panel ~/.config/lxpanel/LXDE-pi/panels/panel
 # Apply changes
 sudo /etc/init.d/alsa-utils restart
 
-
 # Create the script to run after each reboot and make the soundcard available
 i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
 rm -f $i2s_driver_script
-echo "cd $RPI_SETUP_DIR" >> $i2s_driver_script
 
 # Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
 # According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
@@ -136,10 +134,10 @@ echo "sleep 1"  >> $i2s_driver_script
 
 case $XMOS_DEVICE in
   xvf3510)
-    I2S_MODULE=loader/is2_master/i2s_master_loader.ko
+    I2S_MODE=master
     ;;
   xvf3500|xvf3100)
-    I2S_MODULE=loader/is2_slave/i2s_slave_loader.ko
+    I2S_MODE=slave
     ;;
   *)
     echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
@@ -147,6 +145,8 @@ case $XMOS_DEVICE in
     ;;
 esac
 
+I2S_NAME=i2s_$I2S_MODE
+I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
 echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
 
 echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
