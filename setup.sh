@@ -92,7 +92,6 @@ if [[ -e ~/.asoundrc ]]; then
 fi
 if [[ -e /usr/share/alsa/pulse-alsa.conf ]]; then
   sudo mv /usr/share/alsa/pulse-alsa.conf  /usr/share/alsa/pulse-alsa.conf.bak
-  sudo mv ~/.config/lxpanel/LXDE-pi/panels/panel ~/.config/lxpanel/LXDE-pi/panels/panel.bak
 fi
 
 # Check XMOS device for asoundrc selection.
@@ -116,8 +115,6 @@ cp $ASOUNDRC_TEMPLATE ~/.asoundrc
 # Make the asoundrc file read-only otherwise lxpanel rewrites it
 # as it doesn't support anything but a hardware type device
 chmod a-w ~/.asoundrc
-
-cp $RPI_SETUP_DIR/resources/panel ~/.config/lxpanel/LXDE-pi/panels/panel
 
 # Apply changes
 sudo /etc/init.d/alsa-utils restart
