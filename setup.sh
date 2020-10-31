@@ -3,7 +3,6 @@ pushd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null
 RPI_SETUP_DIR="$( pwd )"
 
 # Valid values for XMOS device
-VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510"
 XMOS_DEVICE=
 if [[ $# -ge 1 ]]; then
   XMOS_DEVICE=$1
@@ -11,21 +10,28 @@ else
   echo error: No device type specified.
   exit 1
 fi
-# Validate XMOS device
-validate_device() {
-  local DEV=$1
-  shift
-  for d in $*; do
-    if [[ "$d" = $XMOS_DEVICE ]]; then
-      return 0
-    fi
-  done
-  return 1
-}
-if ! validate_device $XMOS_DEVICE $VALID_XMOS_DEVICES; then
-  echo error: $XMOS_DEVICE is not a valid device type.
-  exit 1
-fi
+
+# Configure device-specific settings
+case $XMOS_DEVICE in
+  xvf3510)
+    I2S_MODE=master
+    I2S_MODULE_CFLAGS="$MODULE_CFLAGS$EP-DI2S_MASTER"
+    I2S_CLK_DAC_SETUP=y
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
+    ;;
+  xvf3500)
+    I2S_MODE=slave
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_stereo
+    ;;
+  xvf3100)
+    I2S_MODE=slave
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
+    ;;
+  *)
+    echo error: unknown XMOS device type $XMOS_DEVICE.
+    exit 1
+  ;;
+esac
 
 # Disable the built-in audio output so there is only one audio
 # device in the system
@@ -64,13 +70,12 @@ if [[ $PI_MODEL = 4 ]]; then
   SEP=" "
 fi
 
-case $XMOS_DEVICE in
-  xvf3510)
-    I2S_MODE=master
-    I2S_MODULE_CFLAGS="$MODULE_CFLAGS$EP-DI2S_MASTER"
+case $I2S_MODE in
+  master)
+    I2S_MODULE_CFLAGS="$I2S_MODULE_CFLAGS$EP-DI2S_MASTER"
     ;;
-  xvf3500|xvf3100)
-    I2S_MODE=slave
+  slave)
+    # no flags needed for I2S slave compilation
     ;;
   *)
     echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
@@ -103,21 +108,10 @@ if [[ -e /usr/share/alsa/pulse-alsa.conf ]]; then
 fi
 
 # Check XMOS device for asoundrc selection.
-case $XMOS_DEVICE in
-  xvf3510)
-    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
-    ;;
-  xvf3500)
-    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_stereo
-    ;;
-  xvf3100)
-    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
-    ;;
-  *)
-    echo error: sound card config not known for XMOS device $XMOS_DEVICE.
-    exit 1
-    ;;
-esac
+if [[ -z "$ASOUNDRC_TEMPLATE" ]]; then
+  echo error: sound card config not known for XMOS device $XMOS_DEVICE.
+  exit 1
+fi
 cp $ASOUNDRC_TEMPLATE ~/.asoundrc
 
 # Make the asoundrc file read-only otherwise lxpanel rewrites it
@@ -137,17 +131,9 @@ rm -f $i2s_driver_script
 # To avoid this issue we add a 1-second delay before the drivers are loaded
 echo "sleep 1"  >> $i2s_driver_script
 
-case $XMOS_DEVICE in
-  xvf3510)
-    I2S_MODE=master
-    ;;
-  xvf3500|xvf3100)
-    I2S_MODE=slave
-    ;;
-  *)
-    echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
-    exit 1
-    ;;
+if [[ -z "$I2S_MODE" ]]; then
+  echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
+  exit 1
 esac
 
 I2S_NAME=i2s_$I2S_MODE
@@ -158,7 +144,7 @@ echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script
 echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
 echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
 
-if [[ $XMOS_DEVICE = xvf3510 ]]; then
+if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   pushd $RPI_SETUP_DIR/resources/clk_dac_setup/ > /dev/null
   make
   popd > /dev/null
@@ -171,7 +157,7 @@ if [[ $XMOS_DEVICE = xvf3510 ]]; then
 fi
 
 sudo apt-get install -y audacity
-if [[ $XMOS_DEVICE = xvf3510 ]]; then
+if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
   rm -f $audacity_script
   echo "#!/usr/bin/env bash" >> $audacity_script
@@ -186,7 +172,7 @@ fi
 # Setup the crontab to restart I2S at reboot
 rm -f $RPI_SETUP_DIR/resources/crontab
 echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
-if [[ $XMOS_DEVICE = xvf3510 ]]; then
+if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   echo "@reboot sh $i2s_clk_dac_script" >> $RPI_SETUP_DIR/resources/crontab
 fi
 crontab $RPI_SETUP_DIR/resources/crontab
