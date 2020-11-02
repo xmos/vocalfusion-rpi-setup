@@ -15,7 +15,6 @@ fi
 case $XMOS_DEVICE in
   xvf3510)
     I2S_MODE=master
-    I2S_MODULE_CFLAGS="$MODULE_CFLAGS$EP-DI2S_MASTER"
     I2S_CLK_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
     ;;
