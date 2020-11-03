@@ -133,7 +133,7 @@ echo "sleep 1"  >> $i2s_driver_script
 if [[ -z "$I2S_MODE" ]]; then
   echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
   exit 1
-esac
+fi
 
 I2S_NAME=i2s_$I2S_MODE
 I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
