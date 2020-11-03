@@ -25,7 +25,7 @@ For XVF3510 devices these actions will be done as well:
 
 ## Setup
 
-1. Install **Raspbian Stretch** on the Raspberry Pi.
+1. Install **Raspbian Buster** on the Raspberry Pi.
 
 2. Ensure running kernel version matches headers kernel headers package. A typical system requires the following `--reinstall` command:
 
