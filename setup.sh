@@ -66,12 +66,15 @@ sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
 if [[ $PI_MODEL = 4 ]]; then
   I2S_MODULE_CFLAGS="-DRPI_4B"
-  SEP=" "
 fi
 
 case $I2S_MODE in
   master)
-    I2S_MODULE_CFLAGS="$I2S_MODULE_CFLAGS$EP-DI2S_MASTER"
+    if [[ -z "$I2S_MODULE_CFLAGS" ]]; then
+      I2S_MODULE_CFLAGS=-DI2S_MASTER
+    else
+      I2S_MODULE_CFLAGS="$I2S_MODULE_CFLAGS -DI2S_MASTER"
+    fi
     ;;
   slave)
     # no flags needed for I2S slave compilation
