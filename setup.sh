@@ -2,6 +2,36 @@
 pushd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null
 RPI_SETUP_DIR="$( pwd )"
 
+# Valid values for XMOS device
+XMOS_DEVICE=
+if [[ $# -ge 1 ]]; then
+  XMOS_DEVICE=$1
+else
+  echo error: No device type specified.
+  exit 1
+fi
+
+# Configure device-specific settings
+case $XMOS_DEVICE in
+  xvf3510)
+    I2S_MODE=master
+    I2S_CLK_DAC_SETUP=y
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
+    ;;
+  xvf3500)
+    I2S_MODE=slave
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_stereo
+    ;;
+  xvf3100)
+    I2S_MODE=slave
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
+    ;;
+  *)
+    echo error: unknown XMOS device type $XMOS_DEVICE.
+    exit 1
+  ;;
+esac
+
 # Disable the built-in audio output so there is only one audio
 # device in the system
 sudo sed -i -e 's/^dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
@@ -34,63 +64,68 @@ sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev
 
 # Build I2S kernel module
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
-RPI4B_FLAG=""
-if [ $PI_MODEL == "4" ] ; then
-    RPI4B_FLAG="-DRPI_4B"
+if [[ $PI_MODEL = 4 ]]; then
+  I2S_MODULE_CFLAGS="-DRPI_4B"
 fi
 
-if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-    pushd $RPI_SETUP_DIR/loader/i2s_master > /dev/null
-    I2S_MASTER_FLAG="-DI2S_MASTER"
+case $I2S_MODE in
+  master)
+    if [[ -z "$I2S_MODULE_CFLAGS" ]]; then
+      I2S_MODULE_CFLAGS=-DI2S_MASTER
+    else
+      I2S_MODULE_CFLAGS="$I2S_MODULE_CFLAGS -DI2S_MASTER"
+    fi
+    ;;
+  slave)
+    # no flags needed for I2S slave compilation
+    ;;
+  *)
+    echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
+    exit 1
+  ;;
+esac
+I2S_BUILD_DIR=$RPI_SETUP_DIR/loader/i2s_$I2S_MODE
+pushd $I2S_BUILD_DIR > /dev/null
+if [[ -n "$I2S_MODULE_CFLAGS" ]]; then
+  CMD="make CFLAGS_MODULE='$I2S_MODULE_CFLAGS'"
 else
-    pushd $RPI_SETUP_DIR/loader/i2s_slave > /dev/null
-    I2S_MASTER_FLAG=""
+  CMD=make
 fi
-CMD="make CFLAGS_MODULE='$I2S_MASTER_FLAG $RPI4B_FLAG'"
 echo $CMD
 eval $CMD
-if [ $? -ne 0 ]; then
-    echo "Error: I2S kernel module build failed"
-    exit 1
+if [[ $? -ne 0 ]]; then
+  echo "Error: I2S kernel module build failed"
+  exit 1
 fi
 
 popd > /dev/null
 
-
 # Move existing files to back up
-if [ -e ~/.asoundrc ] ; then
-    chmod a+w ~/.asoundrc
-    cp ~/.asoundrc ~/.asoundrc.bak
+if [[ -e ~/.asoundrc ]]; then
+  chmod a+w ~/.asoundrc
+  cp ~/.asoundrc ~/.asoundrc.bak
 fi
-if [ -e /usr/share/alsa/pulse-alsa.conf ] ; then
-    sudo mv /usr/share/alsa/pulse-alsa.conf  /usr/share/alsa/pulse-alsa.conf.bak
-    sudo mv ~/.config/lxpanel/LXDE-pi/panels/panel ~/.config/lxpanel/LXDE-pi/panels/panel.bak
-fi
-
-# Check args for asoundrc selection. Default to VF Stereo.
-if [ $# -eq 1 ] && [ $1 = "vocalfusion" ] ; then
-    cp $RPI_SETUP_DIR/resources/asoundrc_vf ~/.asoundrc
-elif [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-    cp $RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510 ~/.asoundrc
-else
-    cp $RPI_SETUP_DIR/resources/asoundrc_vf_stereo ~/.asoundrc
+if [[ -e /usr/share/alsa/pulse-alsa.conf ]]; then
+  sudo mv /usr/share/alsa/pulse-alsa.conf  /usr/share/alsa/pulse-alsa.conf.bak
 fi
 
-cp $RPI_SETUP_DIR/resources/panel ~/.config/lxpanel/LXDE-pi/panels/panel
+# Check XMOS device for asoundrc selection.
+if [[ -z "$ASOUNDRC_TEMPLATE" ]]; then
+  echo error: sound card config not known for XMOS device $XMOS_DEVICE.
+  exit 1
+fi
+cp $ASOUNDRC_TEMPLATE ~/.asoundrc
 
 # Make the asoundrc file read-only otherwise lxpanel rewrites it
 # as it doesn't support anything but a hardware type device
 chmod a-w ~/.asoundrc
 
-
 # Apply changes
 sudo /etc/init.d/alsa-utils restart
-
 
 # Create the script to run after each reboot and make the soundcard available
 i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
 rm -f $i2s_driver_script
-echo "cd $RPI_SETUP_DIR"    >> $i2s_driver_script
 
 # Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
 # According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
@@ -98,47 +133,49 @@ echo "cd $RPI_SETUP_DIR"    >> $i2s_driver_script
 # To avoid this issue we add a 1-second delay before the drivers are loaded
 echo "sleep 1"  >> $i2s_driver_script
 
-if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-    echo "sudo insmod loader/i2s_master/i2s_master_loader.ko"  >> $i2s_driver_script
-else
-    echo "sudo insmod loader/i2s_slave/i2s_slave_loader.ko"   >> $i2s_driver_script
+if [[ -z "$I2S_MODE" ]]; then
+  echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
+  exit 1
 fi
 
+I2S_NAME=i2s_$I2S_MODE
+I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
+echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
 
-echo "# Run Alsa at startup so that alsamixer configures"   >> $i2s_driver_script	
-echo "arecord -d 1 > /dev/null 2>&1"                        >> $i2s_driver_script	
-echo "aplay dummy > /dev/null 2>&1"                         >> $i2s_driver_script
+echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
+echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
+echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
 
-if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-    pushd $RPI_SETUP_DIR/resources/clk_dac_setup/ > /dev/null
-    make
-    popd > /dev/null
-    i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
-    rm -f $i2s_clk_dac_script
-    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"           >> $i2s_clk_dac_script
-    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"           >> $i2s_clk_dac_script
-    echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"       >> $i2s_clk_dac_script
-    echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf3510.py"   >> $i2s_clk_dac_script
+if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
+  pushd $RPI_SETUP_DIR/resources/clk_dac_setup/ > /dev/null
+  make
+  popd > /dev/null
+  i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
+  rm -f $i2s_clk_dac_script
+  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"         >> $i2s_clk_dac_script
+  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"         >> $i2s_clk_dac_script
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"     >> $i2s_clk_dac_script
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf3510.py" >> $i2s_clk_dac_script
 fi
 
-if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-    sudo apt-get install -y audacity
-    audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
-    rm -f $audacity_script
-    echo "#!/usr/bin/env bash" >> $audacity_script
-    echo "/usr/bin/audacity &" >> $audacity_script
-    echo "sleep 5" >> $audacity_script
-    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null"  >> $audacity_script
-    sudo chmod +x $audacity_script
-    sudo mv $audacity_script /usr/local/bin/audacity
+sudo apt-get install -y audacity
+if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
+  audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
+  rm -f $audacity_script
+  echo "#!/usr/bin/env bash" >> $audacity_script
+  echo "/usr/bin/audacity &" >> $audacity_script
+  echo "sleep 5" >> $audacity_script
+  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null" >> $audacity_script
+  sudo chmod +x $audacity_script
+  sudo mv $audacity_script /usr/local/bin/audacity
 fi
 
 
 # Setup the crontab to restart I2S at reboot
 rm -f $RPI_SETUP_DIR/resources/crontab
-echo "@reboot sh $i2s_driver_script"    >> $RPI_SETUP_DIR/resources/crontab
-if [ $# -ge 1 ] && [ $1 = "xvf3510" ] ; then
-    echo "@reboot sh $i2s_clk_dac_script"   >> $RPI_SETUP_DIR/resources/crontab
+echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
+if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
+  echo "@reboot sh $i2s_clk_dac_script" >> $RPI_SETUP_DIR/resources/crontab
 fi
 crontab $RPI_SETUP_DIR/resources/crontab
 
