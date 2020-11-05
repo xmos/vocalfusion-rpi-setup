@@ -2,7 +2,7 @@
 
 This repository provides a simple-to-use automated script to configure the Raspberry Pi to use **xCORE VocalFusion** for audio.
 
-**Note:** This repository is designed for use within the following **xCORE VocalFusion** repositorie:
+**Note:** This repository is designed for use within the following **xCORE VocalFusion** repository:
 - xCORE VocalFusion Kit for AVS: https://github.com/xmos/vocalfusion-avs-setup
 
 This setup will perform the following operations:
