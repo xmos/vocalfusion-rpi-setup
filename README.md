@@ -2,10 +2,8 @@
 
 This repository provides a simple-to-use automated script to configure the Raspberry Pi to use **xCORE VocalFusion** for audio.
 
-**Note:** This repository is designed for use within the following **xCORE VocalFusion** repositories:
-- xCORE VocalFusion Stereo 2-Mic Kit for AVS: https://github.com/xmos/vocalfusion_3510_avs_setup
-- xCORE VocalFusion Stereo 4-Mic Kit for AVS: https://github.com/xmos/vocalfusion-stereo-avs-setup
-- xCORE VocalFusion 4-Mic Kit for AVS: https://github.com/xmos/vocalfusion-avs-setup
+**Note:** This repository is designed for use within the following **xCORE VocalFusion** repositorie:
+- xCORE VocalFusion Kit for AVS: https://github.com/xmos/vocalfusion-avs-setup
 
 This setup will perform the following operations:
 
@@ -29,6 +27,7 @@ For XVF3510 devices these actions will be done as well:
 
 2. Ensure running kernel version matches headers kernel headers package. A typical system requires the following `--reinstall` command:
 
+   ```sudo apt-get update```
    ```sudo apt-get install --reinstall raspberrypi-bootloader raspberrypi-kernel```
 
    followed by a reboot.
@@ -39,11 +38,11 @@ For XVF3510 devices these actions will be done as well:
 
 4. For VocalFusion devices, run the installation script as follows:
 
-   ```./setup.sh vocalfusion```
+   ```./setup.sh xvf3100```
 
    For VocalFusion Stereo devices, run the installation script as follows:
 
-   ```./setup.sh```
+   ```./setup.sh xvf3500```
 
    For XVF3510 devices, run the installation script as follows:
 
