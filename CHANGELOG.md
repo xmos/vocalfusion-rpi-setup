@@ -2,7 +2,7 @@
 
 ## 4.0.0
 
-  * Change supported command line arguments. Instead of vocalfusion for 3100, nothing for 3500, and 3510 for 3510, argments are now xvf3100 for 3100, xvf3500 for 3500, and xvf3510 for 3510.
+  * Change supported command line arguments. Instead of vocalfusion for 3100, nothing for 3500, and vxf3510 for 3510, arguments are now xvf3100 for 3100, xvf3500 for 3500, and xvf3510 for 3510.
   * Internal changes to support adding future products.
 
 ## 3.0.0
