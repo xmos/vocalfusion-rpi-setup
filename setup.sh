@@ -13,7 +13,7 @@ fi
 
 # Configure device-specific settings
 case $XMOS_DEVICE in
-  xvf3510)
+  xvf3[56]10)
     I2S_MODE=master
     I2S_CLK_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
@@ -175,7 +175,7 @@ fi
 rm -f $RPI_SETUP_DIR/resources/crontab
 echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
 if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
-  echo "@reboot sh $i2s_clk_dac_script" >> $RPI_SETUP_DIR/resources/crontab
+  echo "@reboot sh $i2s_clk_dac_script $XMOS_DEVICE" >> $RPI_SETUP_DIR/resources/crontab
 fi
 crontab $RPI_SETUP_DIR/resources/crontab
 
