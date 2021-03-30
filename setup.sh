@@ -13,7 +13,7 @@ fi
 
 # Configure device-specific settings
 case $XMOS_DEVICE in
-  xvf3510)
+  xvf3[56]10)
     I2S_MODE=master
     I2S_CLK_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
@@ -152,10 +152,10 @@ if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   popd > /dev/null
   i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
   rm -f $i2s_clk_dac_script
-  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"         >> $i2s_clk_dac_script
-  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"         >> $i2s_clk_dac_script
-  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"     >> $i2s_clk_dac_script
-  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf3510.py" >> $i2s_clk_dac_script
+  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"                  >> $i2s_clk_dac_script
+  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $i2s_clk_dac_script
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"              >> $i2s_clk_dac_script
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf.py $XMOS_DEVICE" >> $i2s_clk_dac_script
 fi
 
 sudo apt-get install -y audacity
