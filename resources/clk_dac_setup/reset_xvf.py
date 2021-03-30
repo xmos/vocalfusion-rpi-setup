@@ -37,12 +37,12 @@ def reset(args):
     data_to_write = 0x20 | (state[6] & 0xDF)
     bus.write_byte_data(0x20, 6, data_to_write)
     
-    if level_shifters:
+    if level_shifter:
         # turn on level shifters on 3610 pi Hat
         bus.write_byte_data(0x20, 3, 0x00)
         bus.write_byte_data(0x20, 7, 0xD7)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("hw", desc="Hardware type")
+    parser.add_argument("hw", help="Hardware type")
     reset(parser.parse_args())
