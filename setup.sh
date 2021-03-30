@@ -51,8 +51,11 @@ sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on\ndtparam=i2c_arm_baudra
 sudo raspi-config nonint do_spi 1
 sudo raspi-config nonint do_spi 0
 
-echo "Installing Raspberry Pi kernel headers"
-sudo apt-get install -y raspberrypi-kernel-headers
+KERNEL_HEADERS_PACKAGE=raspberrypi-kernel-headers
+if ! dpkg -s $KERNEL_HEADERS_PACKAGE &> /dev/null; then
+    echo "Installing Raspberry Pi kernel headers"
+    sudo apt-get install -y $KERNEL_HEADERS_PACKAGE
+fi
 
 echo "Installing the Python3 packages and related libs"
 sudo apt-get install -y python3-matplotlib
