@@ -60,6 +60,10 @@ For XVF3510 devices these actions will be done as well:
    For XVF3510 devices, run the installation script as follows:
 
    ```./setup.sh xvf3510```
+   
+   For XVF3610 devices, run the installation script as follows:
+
+   ```./setup.sh xvf3610```
 
    Wait for the script to complete the installation. This can take several minutes.
 
