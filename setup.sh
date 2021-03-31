@@ -51,6 +51,10 @@ sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on\ndtparam=i2c_arm_baudra
 sudo raspi-config nonint do_spi 1
 sudo raspi-config nonint do_spi 0
 
+# Install the kernel header package to allow building the I2S module.
+# We only need to do this once, and we must not do it again if we have called
+# 'apt-get update' as it may install a later kernel and headers which have not
+# been tested and verified.
 KERNEL_HEADERS_PACKAGE=raspberrypi-kernel-headers
 if ! dpkg -s $KERNEL_HEADERS_PACKAGE &> /dev/null; then
     echo "Installing Raspberry Pi kernel headers"
