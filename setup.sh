@@ -13,7 +13,7 @@ fi
 
 # Configure device-specific settings
 case $XMOS_DEVICE in
-  xvf3510)
+  xvf3[56]10)
     I2S_MODE=master
     I2S_CLK_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
@@ -51,8 +51,15 @@ sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on\ndtparam=i2c_arm_baudra
 sudo raspi-config nonint do_spi 1
 sudo raspi-config nonint do_spi 0
 
-echo "Installing Raspberry Pi kernel headers"
-sudo apt-get install -y raspberrypi-kernel-headers
+# Install the kernel header package to allow building the I2S module.
+# We only need to do this once, and we must not do it again if we have called
+# 'apt-get update' as it may install a later kernel and headers which have not
+# been tested and verified.
+KERNEL_HEADERS_PACKAGE=raspberrypi-kernel-headers
+if ! dpkg -s $KERNEL_HEADERS_PACKAGE &> /dev/null; then
+    echo "Installing Raspberry Pi kernel headers"
+    sudo apt-get install -y $KERNEL_HEADERS_PACKAGE
+fi
 
 echo "Installing the Python3 packages and related libs"
 sudo apt-get install -y python3-matplotlib
@@ -152,10 +159,10 @@ if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   popd > /dev/null
   i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
   rm -f $i2s_clk_dac_script
-  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"         >> $i2s_clk_dac_script
-  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"         >> $i2s_clk_dac_script
-  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"     >> $i2s_clk_dac_script
-  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf3510.py" >> $i2s_clk_dac_script
+  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"                  >> $i2s_clk_dac_script
+  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $i2s_clk_dac_script
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"              >> $i2s_clk_dac_script
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf.py $XMOS_DEVICE" >> $i2s_clk_dac_script
 fi
 
 sudo apt-get install -y audacity

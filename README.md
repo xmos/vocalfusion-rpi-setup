@@ -23,14 +23,27 @@ For XVF3510 devices these actions will be done as well:
 
 ## Setup
 
-1. Install **Raspbian Buster** on the Raspberry Pi.
+1. First, obtain the required version of the Raspberry Pi operating system, which is available here:
 
-2. Ensure running kernel version matches headers kernel headers package. A typical system requires the following `--reinstall` command:
+   https://downloads.raspberrypi.org/raspbian/images/raspbian-2020-02-14/2020-02-13-raspbian-buster.zip
 
-   ```sudo apt-get update```
-   ```sudo apt-get install --reinstall raspberrypi-bootloader raspberrypi-kernel```
+   We cannot use the latest as updates to linux kernel v5 have broken the I2S sub-system.
 
-   followed by a reboot.
+   Then, install the Raspberry Pi Imager on a host computer. Raspberry Pi Imager is available here:
+
+   https://www.raspberrypi.org/software/
+
+   Run the Raspberry Pi Imager, and select the 'CHOOSE OS' button. Scroll to the bottom of the displayed list, and select "Use custom". 
+   Then select the file downloaded above (2020-02-13-raspbian-buster.zip) and select "Open". The archive file does not have to be unzipped, the imager software will do that.
+
+   Select the CHOOSE SD CARD button to which to download the image, and then select the "WRITE" button.
+
+   When prompted, remove the written SD card and insert it into the Raspberry Pi. 
+
+2. Connect up the keyboard, mouse, speakers and display to the Raspberry Pi and power up the system. Refer to the **Getting Started Guide** for you platform.
+
+   **DO NOT** follow the prompt to update the software on the system. Set up the locale, and setup a network connect, but **DO NOT** update the software on the Raspberry Pi. This will update the kernel, and then the audio sub-system will not work.
+
 
 3. Clone the Github repository https://github.com/xmos/vocalfusion-rpi-setup:
 
@@ -47,6 +60,10 @@ For XVF3510 devices these actions will be done as well:
    For XVF3510 devices, run the installation script as follows:
 
    ```./setup.sh xvf3510```
+   
+   For XVF3610 devices, run the installation script as follows:
+
+   ```./setup.sh xvf3610```
 
    Wait for the script to complete the installation. This can take several minutes.
 
