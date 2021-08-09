@@ -1,11 +1,11 @@
-# Copyright (c) 2019, XMOS Ltd, All rights reserved
+# Copyright (c) 2021-2021, XMOS Ltd, All rights reserved
 
 import argparse
 import smbus
 
 def reset(args):
     """
-    Function to reset XVF3510 board
+    Function to reset XVF boards
 
     Args:
         args - command line arguments
@@ -36,12 +36,12 @@ def reset(args):
     bus.write_byte_data(0x20, 2, data_to_write)
     data_to_write = 0x20 | (state[6] & 0xDF)
     bus.write_byte_data(0x20, 6, data_to_write)
-    
+
     if level_shifter:
         # turn on level shifters on 3610 pi Hat
         bus.write_byte_data(0x20, 3, 0x00)
         bus.write_byte_data(0x20, 7, 0xD7)
-    
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("hw", help="Hardware type")

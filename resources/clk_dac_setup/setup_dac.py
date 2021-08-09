@@ -1,21 +1,41 @@
 #!usr/bin/python
-# Copyright (c) 2018-2019, XMOS Ltd, All rights reserved
+# Copyright (c) 2018-2021, XMOS Ltd, All rights reserved
 
 #run this on the raspberry pi to program the DAC
 
 import smbus
 import time
 
-def setup_dac():
+def setup_dac(args):
+    """
+    Function to configure DAC of XVF boards
+
+    Args:
+        args - command line arguments
+
+    Returns:
+        None
+    """
+
     samFreq = 48000
     bus = smbus.SMBus(1)
-    
-    # set DAC_RST_N to 0 on the I2C expander (address 0x20)
-    bus.write_byte_data(0x20, 6, 0xff)
-    time.sleep(0.1)
-    bus.write_byte_data(0x20, 6, 0x7f)
-    time.sleep(0.1)
 
+
+    if args.hw == "xvf3600":
+        # set DAC_RST_N to 0 and enable level shifters on the I2C expander (address 0x20)
+        bus.write_byte_data(0x20, 1, 0xFB)
+        time.sleep(0.1)
+        bus.write_byte_data(0x20, 3, 0x0B)
+        time.sleep(0.1)
+        # set DAC_RST_N to 1
+        bus.write_byte_data(0x20, 1, 0xFF)
+        time.sleep(0.1)
+    else:
+        # set DAC_RST_N to 0 on the I2C expander (address 0x20)
+        bus.write_byte_data(0x20, 6, 0xff)
+        time.sleep(0.1)
+        bus.write_byte_data(0x20, 6, 0x7f)
+        time.sleep(0.1)
 
     DEVICE_ADDRESS = 0x18
     # TLV320DAC3101 Register Addresses
@@ -55,9 +75,9 @@ def setup_dac():
     # Wait for 1ms
     time.sleep(1)
     # Set register page to 0
-    bus.write_byte_data(DEVICE_ADDRESS, DAC3101_PAGE_CTRL, 0x00) 
+    bus.write_byte_data(DEVICE_ADDRESS, DAC3101_PAGE_CTRL, 0x00)
     # Initiate SW reset (PLL is powered off as part of reset)
-    bus.write_byte_data(DEVICE_ADDRESS, DAC3101_SW_RST, 0x01) 
+    bus.write_byte_data(DEVICE_ADDRESS, DAC3101_SW_RST, 0x01)
     # so I've got 24MHz in to PLL, I want 24.576MHz or 22.5792MHz out.
 
     # I will always be using fractional-N (D != 0) so we must set R = 1
@@ -66,7 +86,7 @@ def setup_dac():
     # PLL_CLK = CLKIN * ((RxJ.D)/P)
     # We know R = 1, P = 2.
     # PLL_CLK = CLKIN * (J.D / 2)
-                
+
     # For 24.576MHz:
     # J = 8
     # D = 1920
@@ -105,13 +125,13 @@ def setup_dac():
     bus.write_byte_data(DEVICE_ADDRESS, DAC3101_PLL_D_LSB, 0x00);
 
     time.sleep(0.001);
-    
+
     # Set PLL_CLKIN = BCLK (device pin), CODEC_CLKIN = PLL_CLK (generated on-chip)
     bus.write_byte_data(DEVICE_ADDRESS, DAC3101_CLK_GEN_MUX, 0x07);
-    
+
     # Set PLL P and R values and power up.
     bus.write_byte_data(DEVICE_ADDRESS, DAC3101_PLL_P_R, 0x94);
-        
+
 
     # Set NDAC clock divider to 4 and power up.
     bus.write_byte_data(DEVICE_ADDRESS, DAC3101_NDAC_VAL, 0x84)
@@ -179,4 +199,6 @@ def setup_dac():
     bus.write_byte_data(DEVICE_ADDRESS, DAC3101_DAC_VOL, 0x00)
 
 if __name__ == "__main__":
-    setup_dac()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("hw", help="Hardware type")
+    setup_dac(parser.parse_args())
