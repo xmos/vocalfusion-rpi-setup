@@ -161,7 +161,7 @@ if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   rm -f $i2s_clk_dac_script
   echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"                  >> $i2s_clk_dac_script
   echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $i2s_clk_dac_script
-  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py"              >> $i2s_clk_dac_script
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py $XMOS_DEVICE" >> $i2s_clk_dac_script
   echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf.py $XMOS_DEVICE" >> $i2s_clk_dac_script
 fi
 
