@@ -3,6 +3,7 @@
 
 #run this on the raspberry pi to program the DAC
 
+import argparse
 import smbus
 import time
 
