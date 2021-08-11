@@ -13,7 +13,7 @@ fi
 
 # Configure device-specific settings
 case $XMOS_DEVICE in
-  xvf3510|xvf3610|xvf3600)
+  xvf3[56]10)
     I2S_MODE=master
     I2S_CLK_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
@@ -24,6 +24,11 @@ case $XMOS_DEVICE in
     ;;
   xvf3100)
     I2S_MODE=slave
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
+    ;;
+  xvf3600)
+    I2S_MODE=master
+    I2S_CLK_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
   *)
