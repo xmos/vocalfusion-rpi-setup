@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2021, XMOS Ltd, All rights reserved
+# Copyright (c) 2019-2021, XMOS Ltd, All rights reserved
 
 import argparse
 import smbus
