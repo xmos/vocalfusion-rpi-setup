@@ -26,8 +26,13 @@ case $XMOS_DEVICE in
     I2S_MODE=slave
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
-  xvf3600)
+  xvf3600-slave)
     I2S_MODE=master
+    I2S_CLK_DAC_SETUP=y
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
+    ;;
+  xvf3600-master)
+    I2S_MODE=slave
     I2S_CLK_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
@@ -164,14 +169,17 @@ if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   popd > /dev/null
   i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
   rm -f $i2s_clk_dac_script
-  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"                  >> $i2s_clk_dac_script
-  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $i2s_clk_dac_script
+  # Configure the clocks only if RaspberryPi is configured as I2S master
+  if [["$I2S_MODE" == master ]] then
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"                  >> $i2s_clk_dac_script
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $i2s_clk_dac_script
+  fi
   echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py $XMOS_DEVICE" >> $i2s_clk_dac_script
   echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf.py $XMOS_DEVICE" >> $i2s_clk_dac_script
 fi
 
 sudo apt-get install -y audacity
-if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
+if [[ -n "$I2S_CLK_DAC_SETUP" && "$I2S_MODE" == master ]]; then
   audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
   rm -f $audacity_script
   echo "#!/usr/bin/env bash" >> $audacity_script
@@ -181,7 +189,6 @@ if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   sudo chmod +x $audacity_script
   sudo mv $audacity_script /usr/local/bin/audacity
 fi
-
 
 # Setup the crontab to restart I2S at reboot
 rm -f $RPI_SETUP_DIR/resources/crontab
