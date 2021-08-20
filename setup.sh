@@ -170,7 +170,7 @@ if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   i2s_clk_dac_script=$RPI_SETUP_DIR/resources/init_i2s_clks.sh
   rm -f $i2s_clk_dac_script
   # Configure the clocks only if RaspberryPi is configured as I2S master
-  if [["$I2S_MODE" == master ]] then
+  if [[ "$I2S_MODE" == "master" ]]; then
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"                  >> $i2s_clk_dac_script
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $i2s_clk_dac_script
   fi
@@ -179,13 +179,15 @@ if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
 fi
 
 sudo apt-get install -y audacity
-if [[ -n "$I2S_CLK_DAC_SETUP" && "$I2S_MODE" == master ]]; then
+if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
   audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
   rm -f $audacity_script
   echo "#!/usr/bin/env bash" >> $audacity_script
   echo "/usr/bin/audacity &" >> $audacity_script
   echo "sleep 5" >> $audacity_script
-  echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null" >> $audacity_script
+  if [[ "$I2S_MODE" == "master" ]]; then
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null" >> $audacity_script
+  fi
   sudo chmod +x $audacity_script
   sudo mv $audacity_script /usr/local/bin/audacity
 fi
