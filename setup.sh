@@ -174,8 +174,9 @@ if [[ -n "$I2S_CLK_DAC_SETUP" ]]; then
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"                  >> $i2s_clk_dac_script
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $i2s_clk_dac_script
   fi
-  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py $XMOS_DEVICE" >> $i2s_clk_dac_script
-  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf.py $XMOS_DEVICE" >> $i2s_clk_dac_script
+  # Note that only the substring xvfXXXX from $XMOS_DEVICE is used in the lines below
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py $(echo $XMOS_DEVICE | cut -c1-7)" >> $i2s_clk_dac_script
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf.py $(echo $XMOS_DEVICE | cut -c1-7)" >> $i2s_clk_dac_script
 fi
 
 sudo apt-get install -y audacity
