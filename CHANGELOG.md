@@ -1,8 +1,13 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 4.2.0
+
+  * Added support for xvf3600.
+  * Renamed I2S_CLK_DAC_SETUP flag to include I2S master configurations
+
 ## 4.1.0
 
-* Added support for xvf3610.
+  * Added support for xvf3610.
 
 ## 4.0.0
 

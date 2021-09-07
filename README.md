@@ -33,12 +33,12 @@ For XVF3510 devices these actions will be done as well:
 
    https://www.raspberrypi.org/software/
 
-   Run the Raspberry Pi Imager, and select the 'CHOOSE OS' button. Scroll to the bottom of the displayed list, and select "Use custom". 
+   Run the Raspberry Pi Imager, and select the 'CHOOSE OS' button. Scroll to the bottom of the displayed list, and select "Use custom".
    Then select the file downloaded above (2020-02-13-raspbian-buster.zip) and select "Open". The archive file does not have to be unzipped, the imager software will do that.
 
    Select the CHOOSE SD CARD button to which to download the image, and then select the "WRITE" button.
 
-   When prompted, remove the written SD card and insert it into the Raspberry Pi. 
+   When prompted, remove the written SD card and insert it into the Raspberry Pi.
 
 2. Connect up the keyboard, mouse, speakers and display to the Raspberry Pi and power up the system. Refer to the **Getting Started Guide** for you platform.
 
@@ -60,7 +60,15 @@ For XVF3510 devices these actions will be done as well:
    For XVF3510 devices, run the installation script as follows:
 
    ```./setup.sh xvf3510```
-   
+
+   For XVF3600 I2S master devices, run the installation script as follows:
+
+   ```./setup.sh xvf3600-master```
+
+   For XVF3600 I2S slave devices, run the installation script as follows:
+
+   ```./setup.sh xvf3600-slave```
+
    For XVF3610 devices, run the installation script as follows:
 
    ```./setup.sh xvf3610```
