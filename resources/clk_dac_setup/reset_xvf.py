@@ -13,9 +13,6 @@ def reset(args):
     Returns:
         None
     """
-    # Features
-    level_shifter = False
-
     bus = smbus.SMBus(1)
 
     state = {}
