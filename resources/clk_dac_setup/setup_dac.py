@@ -22,13 +22,20 @@ def setup_dac(args):
     bus = smbus.SMBus(1)
 
 
-    if args.hw == "xvf3600":
+    if args.hw == "xvf3600" or args.hw == "xvf3610" :
+        # Note that: byte 0 is input, byte 1 is output and byte 3 is cfg (direction)
         # set DAC_RST_N to 0 and enable level shifters on the I2C expander (address 0x20)
         bus.write_byte_data(0x20, 1, 0xFB)
         time.sleep(0.1)
-        bus.write_byte_data(0x20, 3, 0x0B)
+        # Set the following pins as inputs on the I2C expander (address 0x20)
+        #  - bit 0: XVF_RST_N
+        #  - bit 1: INT_N
+        #  - bit 3: BOOT_SEL
+        #  - bit 7: MUTE (this pin is only used in xvf3610, but it won't affect the behaviour of xvf3600)
+        # Use DAC_RST_N as a driven output and level shift OE as driven
+        bus.write_byte_data(0x20, 3, 0x8B)
         time.sleep(0.1)
-        # set DAC_RST_N to 1
+        # set DAC_RST_N to 1 on the I2C expander (address 0x20)
         bus.write_byte_data(0x20, 1, 0xFF)
         time.sleep(0.1)
     else:
