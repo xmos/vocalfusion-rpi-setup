@@ -21,28 +21,68 @@ def setup_dac(args):
     samFreq = 48000
     bus = smbus.SMBus(1)
 
+    I2C_EXPANDER_ADDRESS = 0x20
 
     if args.hw == "xvf3600" or args.hw == "xvf3610" :
-        # Note that: byte 0 is input, byte 1 is output and byte 3 is cfg (direction)
-        # set DAC_RST_N to 0 and enable level shifters on the I2C expander (address 0x20)
-        bus.write_byte_data(0x20, 1, 0xFB)
+
+        # I2C expander register addresses
+        I2C_EXPANDER_INPUT_PORT_REG = 0x01
+        I2C_EXPANDER_OUTPUT_PORT_REG = 0x02
+        I2C_EXPANDER_CONFIGURATION_REG = 0x03
+        I2C_EXPANDER_INTERRUPT_MASK_REG = 0x45
+
+        # I2C expander pins
+        XVF_RST_N_PIN = 0
+        INT_N_PIN = 1
+        DAC_RST_N_PIN = 2
+        BOOT_SEL_PIN = 3
+        MCLK_OE_PIN = 4
+        SPI_OE_PIN = 5
+        I2S_OE_PIN = 6
+        MUTE_PIN = 7
+
+        # set DAC_RST_N to 0 and enable level shifters on the I2C expander
+        INPUT_PORT_MASK = (1<<XVF_RST_N_PIN) | \
+                          (1<<INT_N_PIN)     | \
+                          (1<<BOOT_SEL_PIN)  | \
+                          (1<<MCLK_OE_PIN)   | \
+                          (1<<SPI_OE_PIN)    | \
+                          (1<<I2S_OE_PIN)    | \
+                          (1<<MUTE_PIN)
+
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INPUT_PORT_REG, INPUT_PORT_MASK)
         time.sleep(0.1)
-        # Set the following pins as inputs on the I2C expander (address 0x20)
-        #  - bit 0: XVF_RST_N
-        #  - bit 1: INT_N
-        #  - bit 3: BOOT_SEL
-        #  - bit 7: MUTE (this pin is only used in xvf3610, but it won't affect the behaviour of xvf3600)
         # Use DAC_RST_N as a driven output and level shift OE as driven
-        bus.write_byte_data(0x20, 3, 0x8B)
+        # Configure the mute pin as input only for XVF3610
+        if args.hw == "xvf3600":
+            CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
+                                 (1<<INT_N_PIN)     | \
+                                 (1<<BOOT_SEL_PIN)
+        else if args.hw == "xvf3610":
+            CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
+                                 (1<<INT_N_PIN)     | \
+                                 (1<<BOOT_SEL_PIN)  | \
+                                 (1<<MUTE_PIN)
+        else:
+            print(f"Error: unsupported board {args.hw}")
+            exit(1)
+
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_CONFIGURATION_REG, CONFIGURATION_MASK)
         time.sleep(0.1)
-        # set DAC_RST_N to 1 on the I2C expander (address 0x20)
-        bus.write_byte_data(0x20, 1, 0xFF)
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INPUT_PORT_REG, INPUT_PORT_MASK | (1<<DAC_RST_N_PIN))
         time.sleep(0.1)
+
+        # Enable the interrupt on INT_N pin for XVF3610
+        if args.hw == "xvf3610":
+            # Interrupts are enabled by setting corresponding mask bits to logic 0
+            INTERRUPT_MASK = 0xFF & ~(1<<INT_N_PIN))
+            bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INTERRUPT_MASK_REG, INTERRUPT_MASK)
+
     else:
         # set DAC_RST_N to 0 on the I2C expander (address 0x20)
-        bus.write_byte_data(0x20, 6, 0xff)
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, 6, 0xff)
         time.sleep(0.1)
-        bus.write_byte_data(0x20, 6, 0x7f)
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, 6, 0x7f)
         time.sleep(0.1)
 
     DEVICE_ADDRESS = 0x18
