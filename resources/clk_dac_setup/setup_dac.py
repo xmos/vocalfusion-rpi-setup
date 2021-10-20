@@ -41,6 +41,7 @@ def setup_dac(args):
         I2S_OE_PIN = 6
         MUTE_PIN = 7
 
+        # Set pin values
         # set DAC_RST_N to 0 and enable level shifters on the I2C expander
         INPUT_PORT_MASK = (1<<XVF_RST_N_PIN) | \
                           (1<<INT_N_PIN)     | \
@@ -52,7 +53,8 @@ def setup_dac(args):
 
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INPUT_PORT_REG, INPUT_PORT_MASK)
         time.sleep(0.1)
-        # Use DAC_RST_N as a driven output and level shift OE as driven
+        # Configure pin directions:
+        # use DAC_RST_N and level shift OE as driven outputs
         # Configure the mute pin as input only for XVF3610
         if args.hw == "xvf3600":
             CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
@@ -69,14 +71,16 @@ def setup_dac(args):
 
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_CONFIGURATION_REG, CONFIGURATION_MASK)
         time.sleep(0.1)
-        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INPUT_PORT_REG, INPUT_PORT_MASK | (1<<DAC_RST_N_PIN))
-        time.sleep(0.1)
 
         # Enable the interrupt on INT_N pin for XVF3610
         if args.hw == "xvf3610":
             # Interrupts are enabled by setting corresponding mask bits to logic 0
             INTERRUPT_MASK = 0xFF & ~(1<<INT_N_PIN))
             bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INTERRUPT_MASK_REG, INTERRUPT_MASK)
+
+        # Reset the DAC
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INPUT_PORT_REG, INPUT_PORT_MASK | (1<<DAC_RST_N_PIN))
+        time.sleep(0.1)
 
     else:
         # set DAC_RST_N to 0 on the I2C expander (address 0x20)
