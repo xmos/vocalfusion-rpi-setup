@@ -60,7 +60,7 @@ def setup_dac(args):
             CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
                                  (1<<INT_N_PIN)     | \
                                  (1<<BOOT_SEL_PIN)
-        else if args.hw == "xvf3610":
+        elif args.hw == "xvf3610":
             CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
                                  (1<<INT_N_PIN)     | \
                                  (1<<BOOT_SEL_PIN)  | \
@@ -75,7 +75,7 @@ def setup_dac(args):
         # Enable the interrupt on INT_N pin for XVF3610
         if args.hw == "xvf3610":
             # Interrupts are enabled by setting corresponding mask bits to logic 0
-            INTERRUPT_MASK = 0xFF & ~(1<<INT_N_PIN))
+            INTERRUPT_MASK = 0xFF & ~(1<<INT_N_PIN)
             bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INTERRUPT_MASK_REG, INTERRUPT_MASK)
 
         # Reset the DAC
