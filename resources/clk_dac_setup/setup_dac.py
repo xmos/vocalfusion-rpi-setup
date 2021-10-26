@@ -65,9 +65,6 @@ def setup_dac(args):
                                  (1<<INT_N_PIN)     | \
                                  (1<<BOOT_SEL_PIN)  | \
                                  (1<<MUTE_PIN)
-        else:
-            print(f"Error: unsupported board {args.hw}")
-            exit(1)
 
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_CONFIGURATION_REG, CONFIGURATION_MASK)
         time.sleep(0.1)
