@@ -13,12 +13,6 @@ def reset(args):
     Returns:
         None
     """
-    # Features
-    level_shifter = False
-
-    if args.hw == "xvf3610":
-        level_shifter = True
-
     bus = smbus.SMBus(1)
 
     state = {}
@@ -36,11 +30,6 @@ def reset(args):
     bus.write_byte_data(0x20, 2, data_to_write)
     data_to_write = 0x20 | (state[6] & 0xDF)
     bus.write_byte_data(0x20, 6, data_to_write)
-
-    if level_shifter:
-        # turn on level shifters on 3610 pi Hat
-        bus.write_byte_data(0x20, 3, 0x00)
-        bus.write_byte_data(0x20, 7, 0xD7)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

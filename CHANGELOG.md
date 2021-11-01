@@ -1,5 +1,10 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 4.3.0
+
+  * Added support for xvf3610 EVK board
+  * Removed support for xvf3610 development board
+
 ## 4.2.0
 
   * Added support for xvf3600.
