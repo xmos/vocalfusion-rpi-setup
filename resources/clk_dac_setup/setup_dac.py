@@ -26,8 +26,8 @@ def setup_dac(args):
     if args.hw == "xvf3600" or args.hw == "xvf3610" :
 
         # I2C expander register addresses
-        I2C_EXPANDER_INPUT_PORT_REG = 0x01
-        I2C_EXPANDER_OUTPUT_PORT_REG = 0x02
+        I2C_EXPANDER_INPUT_PORT_REG = 0x00
+        I2C_EXPANDER_OUTPUT_PORT_REG = 0x01
         I2C_EXPANDER_CONFIGURATION_REG = 0x03
         I2C_EXPANDER_INTERRUPT_MASK_REG = 0x45
 
@@ -41,19 +41,21 @@ def setup_dac(args):
         I2S_OE_PIN = 6
         MUTE_PIN = 7
 
-        # Set pin values
-        # set DAC_RST_N to 0 and enable level shifters on the I2C expander
-        INPUT_PORT_MASK = (1<<XVF_RST_N_PIN) | \
-                          (1<<INT_N_PIN)     | \
+        # Set pin values in output register. Expander will drive these when configured to output.
+        # Key values are the _OE_PINS set high so the Pi will drive the 3610 with clocks, spi & i2s 
+        # Also dac reset is set high         
+        OUTPUT_PORT_MASK =(1<<XVF_RST_N_PIN) | \
+                          (1<<DAC_RST_N_PIN) | \
                           (1<<BOOT_SEL_PIN)  | \
                           (1<<MCLK_OE_PIN)   | \
                           (1<<SPI_OE_PIN)    | \
                           (1<<I2S_OE_PIN)    | \
                           (1<<MUTE_PIN)
 
-        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INPUT_PORT_REG, INPUT_PORT_MASK)
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_OUTPUT_PORT_REG, OUTPUT_PORT_MASK)
         time.sleep(0.1)
-        # Configure pin directions:
+        # Configure pin directions. Setting to 1 means input, or Hi-Z. So anything not mentioned
+        # below will be an output. Note reset, int and boot_sel NOT driven because they are set high in the mask
         # use DAC_RST_N and level shift OE as driven outputs
         # Configure the mute pin as input only for XVF3610
         if args.hw == "xvf3600":
