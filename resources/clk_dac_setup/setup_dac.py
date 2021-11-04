@@ -26,7 +26,6 @@ def setup_dac(args):
     if args.hw == "xvf3600" or args.hw == "xvf3610" :
 
         # I2C expander register addresses
-        I2C_EXPANDER_INPUT_PORT_REG = 0x00
         I2C_EXPANDER_OUTPUT_PORT_REG = 0x01
         I2C_EXPANDER_CONFIGURATION_REG = 0x03
         I2C_EXPANDER_INTERRUPT_MASK_REG = 0x45
@@ -43,7 +42,7 @@ def setup_dac(args):
 
         # Set pin values
         # set DAC_RST_N to 0 and enable level shifters on the I2C expander
-        INPUT_PORT_MASK = (1<<XVF_RST_N_PIN) | \
+        OUTPUT_PORT_MASK= (1<<XVF_RST_N_PIN) | \
                           (1<<INT_N_PIN)     | \
                           (1<<BOOT_SEL_PIN)  | \
                           (1<<MCLK_OE_PIN)   | \
@@ -77,7 +76,7 @@ def setup_dac(args):
             bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INTERRUPT_MASK_REG, INTERRUPT_MASK)
 
         # Reset the DAC
-        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INPUT_PORT_REG, INPUT_PORT_MASK | (1<<DAC_RST_N_PIN))
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_OUTPUT_PORT_REG, OUTPUT_PORT_MASK | (1<<DAC_RST_N_PIN))
         time.sleep(0.1)
 
     else:
