@@ -41,11 +41,10 @@ def setup_dac(args):
         I2S_OE_PIN = 6
         MUTE_PIN = 7
 
-        # Set pin values in output register. Expander will drive these when configured to output.
-        # Key values are the _OE_PINS set high so the Pi will drive the 3610 with clocks, spi & i2s 
-        # Also dac reset is set high         
-        OUTPUT_PORT_MASK =(1<<XVF_RST_N_PIN) | \
-                          (1<<DAC_RST_N_PIN) | \
+        # Set pin values
+        # set DAC_RST_N to 0 and enable level shifters on the I2C expander
+        INPUT_PORT_MASK = (1<<XVF_RST_N_PIN) | \
+                          (1<<INT_N_PIN)     | \
                           (1<<BOOT_SEL_PIN)  | \
                           (1<<MCLK_OE_PIN)   | \
                           (1<<SPI_OE_PIN)    | \
