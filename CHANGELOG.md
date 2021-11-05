@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 4.3.1
+
+  * Fix comments and reg names in setup_dac.py
+
 ## 4.3.0
 
   * Added support for xvf3610 EVK board
