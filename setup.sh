@@ -2,6 +2,7 @@
 pushd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null
 RPI_SETUP_DIR="$( pwd )"
 
+I2S_MODE=
 # Valid values for XMOS device
 XMOS_DEVICE=
 if [[ $# -ge 1 ]]; then
@@ -89,7 +90,8 @@ PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
 if [[ $PI_MODEL = 4 ]]; then
   I2S_MODULE_CFLAGS="-DRPI_4B"
 fi
-if [[ -z "$I2S_MODE" ]]; then
+echo $I2S_MODE
+if [[ -n "$I2S_MODE" ]]; then
   case $I2S_MODE in
     master)
       if [[ -z "$I2S_MODULE_CFLAGS" ]]; then
@@ -164,30 +166,26 @@ if [[ -n "$I2S_MODE" ]]; then
     echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
     echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
     echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
+
+
+    # Create the script to run after each reboot and make the soundcard available
+    i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
+    rm -f $i2s_driver_script
+
+    # Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
+    # According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
+    # this bit is set after 2 PCM clocks have occurred.
+    # To avoid this issue we add a 1-second delay before the drivers are loaded
+    echo "sleep 1"  >> $i2s_driver_script
+
+    I2S_NAME=i2s_$I2S_MODE
+    I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
+    echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
+
+    echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
+    echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
+    echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
 fi
-
-# Create the script to run after each reboot and make the soundcard available
-i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
-rm -f $i2s_driver_script
-
-# Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
-# According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
-# this bit is set after 2 PCM clocks have occurred.
-# To avoid this issue we add a 1-second delay before the drivers are loaded
-echo "sleep 1"  >> $i2s_driver_script
-
-if [[ -z "$I2S_MODE" ]]; then
-  echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
-  exit 1
-fi
-
-I2S_NAME=i2s_$I2S_MODE
-I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
-echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
-
-echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
-echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
-echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
 
 if [[ -n "$DAC_SETUP" ]]; then
   pushd $RPI_SETUP_DIR/resources/clk_dac_setup/ > /dev/null
@@ -220,17 +218,19 @@ if [[ -n "$DAC_SETUP" ]]; then
 fi
 
 # Setup the crontab to restart I2S at reboot
-rm -f $RPI_SETUP_DIR/resources/crontab
+if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
+  rm -f $RPI_SETUP_DIR/resources/crontab
 
-if [[ -n "$I2S_MODE" ]]; then
+  if [[ -n "$I2S_MODE" ]]; then
     echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
-fi
+  fi
 
-if [[ -n "$DAC_SETUP" ]]; then
-  echo "@reboot sh $dac_and_clks_script" >> $RPI_SETUP_DIR/resources/crontab
-fi
-crontab $RPI_SETUP_DIR/resources/crontab
-
-echo "To enable I2S, I2C and SPI, this Raspberry Pi must be rebooted."
-
+  if [[ -n "$DAC_SETUP" ]]; then
+    echo "@reboot sh $dac_and_clks_script" >> $RPI_SETUP_DIR/resources/crontab
+  fi
+  crontab $RPI_SETUP_DIR/resources/crontab
 popd > /dev/null
+fi
+
+echo "To enable all interfaces, this Raspberry Pi must be rebooted."
+
