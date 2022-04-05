@@ -89,7 +89,7 @@ PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
 if [[ $PI_MODEL = 4 ]]; then
   I2S_MODULE_CFLAGS="-DRPI_4B"
 fi
-if [[ -n "$I2S_MODE" ]]; then
+if [[ -z "$I2S_MODE" ]]; then
   case $I2S_MODE in
     master)
       if [[ -z "$I2S_MODULE_CFLAGS" ]]; then
