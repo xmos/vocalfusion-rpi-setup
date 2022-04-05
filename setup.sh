@@ -13,10 +13,15 @@ fi
 
 # Configure device-specific settings
 case $XMOS_DEVICE in
-  xvf3[56]10)
+  xvf3[56]10-ua)
+    UA_MODE=y
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_ua
+    ;;
+
+  xvf3[56]10-int)
     I2S_MODE=master
     DAC_SETUP=y
-    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/soundrc_vf_xvf3510_int
     ;;
   xvf3500)
     I2S_MODE=slave
@@ -77,7 +82,7 @@ sudo apt-get install -y python3-numpy
 sudo apt-get install -y libatlas-base-dev
 
 echo  "Installing necessary packages for dev kit"
-sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev
+sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev libevdev-dev libudev-dev
 
 # Build I2S kernel module
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
@@ -140,6 +145,26 @@ chmod a-w ~/.asoundrc
 # Apply changes
 sudo /etc/init.d/alsa-utils restart
 
+if [[ -n "$I2S_MODE" ]]; then
+    # Create the script to run after each reboot and make the soundcard available
+    i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
+    rm -f $i2s_driver_script
+
+    # Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
+    # According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
+    # this bit is set after 2 PCM clocks have occurred.
+    # To avoid this issue we add a 1-second delay before the drivers are loaded
+    echo "sleep 1"  >> $i2s_driver_script
+
+    I2S_NAME=i2s_$I2S_MODE
+    I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
+    echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
+
+    echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
+    echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
+    echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
+fi
+
 # Create the script to run after each reboot and make the soundcard available
 i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
 rm -f $i2s_driver_script
@@ -195,7 +220,11 @@ fi
 
 # Setup the crontab to restart I2S at reboot
 rm -f $RPI_SETUP_DIR/resources/crontab
-echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
+
+if [[ -n "$I2S_MODE" ]]; then
+    echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
+fi
+
 if [[ -n "$DAC_SETUP" ]]; then
   echo "@reboot sh $dac_and_clks_script" >> $RPI_SETUP_DIR/resources/crontab
 fi
