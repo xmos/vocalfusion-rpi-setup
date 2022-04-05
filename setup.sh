@@ -89,38 +89,36 @@ PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
 if [[ $PI_MODEL = 4 ]]; then
   I2S_MODULE_CFLAGS="-DRPI_4B"
 fi
-
-case $I2S_MODE in
-  master)
-    if [[ -z "$I2S_MODULE_CFLAGS" ]]; then
-      I2S_MODULE_CFLAGS=-DI2S_MASTER
-    else
-      I2S_MODULE_CFLAGS="$I2S_MODULE_CFLAGS -DI2S_MASTER"
-    fi
+if [[ -n "$I2S_MODE" ]]; then
+  case $I2S_MODE in
+    master)
+      if [[ -z "$I2S_MODULE_CFLAGS" ]]; then
+        I2S_MODULE_CFLAGS=-DI2S_MASTER
+      else
+        I2S_MODULE_CFLAGS="$I2S_MODULE_CFLAGS -DI2S_MASTER"
+       fi
+      ;;
+    slave)
+      # no flags needed for I2S slave compilation
+      ;;
+    *)
+      echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
+      exit 1
     ;;
-  slave)
-    # no flags needed for I2S slave compilation
-    ;;
-  "")
-    # I2S_MODE is not defined for UA configurations
-    ;;
-  *)
-    echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
+  esac
+  I2S_BUILD_DIR=$RPI_SETUP_DIR/loader/i2s_$I2S_MODE
+  pushd $I2S_BUILD_DIR > /dev/null
+  if [[ -n "$I2S_MODULE_CFLAGS" ]]; then
+    CMD="make CFLAGS_MODULE='$I2S_MODULE_CFLAGS'"
+  else
+    CMD=make
+  fi
+  echo $CMD
+  eval $CMD
+  if [[ $? -ne 0 ]]; then
+    echo "Error: I2S kernel module build failed"
     exit 1
-  ;;
-esac
-I2S_BUILD_DIR=$RPI_SETUP_DIR/loader/i2s_$I2S_MODE
-pushd $I2S_BUILD_DIR > /dev/null
-if [[ -n "$I2S_MODULE_CFLAGS" ]]; then
-  CMD="make CFLAGS_MODULE='$I2S_MODULE_CFLAGS'"
-else
-  CMD=make
-fi
-echo $CMD
-eval $CMD
-if [[ $? -ne 0 ]]; then
-  echo "Error: I2S kernel module build failed"
-  exit 1
+  fi
 fi
 
 popd > /dev/null
