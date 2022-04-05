@@ -101,6 +101,9 @@ case $I2S_MODE in
   slave)
     # no flags needed for I2S slave compilation
     ;;
+  "")
+    # I2S_MODE is not defined for UA configurations
+    ;;
   *)
     echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
     exit 1
