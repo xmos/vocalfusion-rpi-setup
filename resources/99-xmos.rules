@@ -1,0 +1,5 @@
+SUBSYSTEM!="usb|usb_device", GOTO="xmos_rules_end"
+ACTION!="add", GOTO="xmos_rules_end"
+ATTRS{idVendor}=="20b1", ATTRS{idProduct}=="0014", MODE="0666", SYMLINK+="xvf3510-%n"
+ATTRS{idVendor}=="20b1", ATTRS{idProduct}=="0016", MODE="0666", SYMLINK+="xvf3610-%n"
+ATTRS{idVendor}=="20b1", ATTRS{idProduct}=="0018", MODE="0666", SYMLINK+="xvf3615-%n"

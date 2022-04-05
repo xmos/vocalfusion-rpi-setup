@@ -90,7 +90,7 @@ PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
 if [[ $PI_MODEL = 4 ]]; then
   I2S_MODULE_CFLAGS="-DRPI_4B"
 fi
-echo $I2S_MODE
+
 if [[ -n "$I2S_MODE" ]]; then
   case $I2S_MODE in
     master)
@@ -124,6 +124,11 @@ if [[ -n "$I2S_MODE" ]]; then
 fi
 
 popd > /dev/null
+
+# Copy the udev rules files if device is UA
+if [[ -n "$UA_MODE" ]]; then
+  sudo cp $RPI_SETUP_DIR/resources/99-xmos.rules /etc/udev/rules.d/
+fi
 
 # Move existing files to back up
 if [[ -e ~/.asoundrc ]]; then
