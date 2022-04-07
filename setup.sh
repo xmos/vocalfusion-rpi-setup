@@ -22,7 +22,7 @@ case $XMOS_DEVICE in
   xvf3[56]10-int)
     I2S_MODE=master
     DAC_SETUP=y
-    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/soundrc_vf_xvf3510_int
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_int
     ;;
   xvf3500)
     I2S_MODE=slave
