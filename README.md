@@ -11,6 +11,7 @@ This setup will perform the following operations:
 - install the Raspberry Pi kernel headers
 - install the required packages
 - compile the I2S drivers
+- update the asoundrc file
 - add a cron job to load the I2S drivers at boot up
 
 For XVF3510 devices these actions will be done as well:
@@ -18,8 +19,23 @@ For XVF3510 devices these actions will be done as well:
 - configure MCLK at 24576kHz from pin 7 (BCM 4)
 - configure I2S BCLK at 3072kHz from pin 12 (BCM18)
 - update the alias for Audacity
+- update the asoundrc file
 - add a cron job to reset the device at boot up
 - add a cron job to configure the DAC at boot up
+
+For XVF361x-INT devices these actions will be done as well:
+
+- configure MCLK at 12288kHz from pin 7 (BCM 4)
+- configure I2S BCLK at 3072kHz from pin 12 (BCM18)
+- update the alias for Audacity
+- update the asoundrc file
+- add a cron job to reset the device at boot up
+- add a cron job to configure the DAC at boot up
+
+For XVF361x-UA devices these actions will be done as well:
+
+- update the asoundrc file
+- update udev rules
 
 ## Setup
 
@@ -69,9 +85,21 @@ For XVF3510 devices these actions will be done as well:
 
    ```./setup.sh xvf3600-slave```
 
-   For XVF3610 devices, run the installation script as follows:
+   For XVF3610-UA devices, run the installation script as follows:
 
-   ```./setup.sh xvf3610```
+   ```./setup.sh xvf3610-ua```
+
+   For XVF3610-INT devices, run the installation script as follows:
+
+   ```./setup.sh xvf3610-int```
+
+   For XVF3615-UA devices, run the installation script as follows:
+
+   ```./setup.sh xvf3615-ua```
+
+   For XVF3615-INT devices, run the installation script as follows:
+
+   ```./setup.sh xvf3615-int```
 
    Wait for the script to complete the installation. This can take several minutes.
 
