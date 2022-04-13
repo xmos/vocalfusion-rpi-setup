@@ -11,7 +11,7 @@ This setup will perform the following operations:
 - install the Raspberry Pi kernel headers
 - install the required packages
 - compile the I2S drivers
-- update the asoundrc file
+- update the asoundrc file to support I2S devices
 - add a cron job to load the I2S drivers at boot up
 
 For XVF3510 devices these actions will be done as well:
@@ -19,7 +19,7 @@ For XVF3510 devices these actions will be done as well:
 - configure MCLK at 24576kHz from pin 7 (BCM 4)
 - configure I2S BCLK at 3072kHz from pin 12 (BCM18)
 - update the alias for Audacity
-- update the asoundrc file
+- update the asoundrc file to support I2S devices
 - add a cron job to reset the device at boot up
 - add a cron job to configure the DAC at boot up
 
@@ -28,14 +28,14 @@ For XVF361x-INT devices these actions will be done as well:
 - configure MCLK at 12288kHz from pin 7 (BCM 4)
 - configure I2S BCLK at 3072kHz from pin 12 (BCM18)
 - update the alias for Audacity
-- update the asoundrc file
+- update the asoundrc file to support I2S devices
 - add a cron job to reset the device at boot up
 - add a cron job to configure the DAC at boot up
 
 For XVF361x-UA devices these actions will be done as well:
 
-- update the asoundrc file
-- update udev rules
+- update the asoundrc file to support USB devices
+- update udev rules so that root privileges are not needed to access USB control interface
 
 ## Setup
 
@@ -61,7 +61,7 @@ For XVF361x-UA devices these actions will be done as well:
    **DO NOT** follow the prompt to update the software on the system. Set up the locale, and setup a network connect, but **DO NOT** update the software on the Raspberry Pi. This will update the kernel, and then the audio sub-system will not work.
 
 
-3. Clone the Github repository https://github.com/xmos/vocalfusion-rpi-setup:
+3. On the Raspberry Pi, clone the Github repository https://github.com/xmos/vocalfusion-rpi-setup:
 
    ```git clone https://github.com/xmos/vocalfusion-rpi-setup```
 

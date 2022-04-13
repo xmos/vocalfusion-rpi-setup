@@ -1,6 +1,6 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
-## 4.4.0
+## 5.0.0
 
   * Added support for xvf3610-ua and xvf3615-ua
   * Renamed xvf3615 device as xvf3615-int
