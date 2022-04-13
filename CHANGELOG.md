@@ -1,5 +1,11 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.0.0
+
+  * Added support for xvf3610-ua and xvf3615-ua
+  * Renamed xvf3615 device as xvf3615-int
+  * Renamed xvf3610 device as xvf3610-int
+
 ## 4.3.1
 
   * Fix comments and reg names in setup_dac.py

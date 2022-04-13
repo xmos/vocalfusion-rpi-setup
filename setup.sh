@@ -2,21 +2,70 @@
 pushd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null
 RPI_SETUP_DIR="$( pwd )"
 
-# Valid values for XMOS device
+I2S_MODE=
 XMOS_DEVICE=
-if [[ $# -ge 1 ]]; then
+
+# Valid values for XMOS device
+VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510 xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua"
+
+usage() {
+  local VALID_XMOS_DEVICES_DISPLAY_STRING=
+  local NUMBER_OF_VALID_DEVICES=$(echo $VALID_XMOS_DEVICES | wc -w)
+  local i=1
+  local SEP=
+  # Build a string of valid device options
+  for d in $VALID_XMOS_DEVICES; do
+    if [[ $i -eq $NUMBER_OF_VALID_DEVICES ]]; then
+      SEP=" or "
+    fi
+    VALID_XMOS_DEVICES_DISPLAY_STRING=$VALID_XMOS_DEVICES_DISPLAY_STRING$SEP$d
+    SEP=", "
+    (( ++i ))
+  done
+
+  cat <<EOT
+This script sets up the Raspberry Pi to use different XMOS devices
+usage: setup.sh <DEVICE-TYPE>
+The DEVICE-TYPE is the XMOS device to setup: $VALID_XMOS_DEVICES_DISPLAY_STRING
+EOT
+}
+
+# validate XMOS_DEVICE value
+validate_device() {
+  local DEV=$1
+  shift
+  for d in $*; do
+    if [[ "$DEV" = "$d" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+if [[ $# == 1 ]]; then
   XMOS_DEVICE=$1
+  if ! validate_device $XMOS_DEVICE $VALID_XMOS_DEVICES; then
+    echo "error: $XMOS_DEVICE is not a valid device type."
+    echo
+    usage
+    exit 1
+  fi
 else
-  echo error: No device type specified.
+  usage
   exit 1
 fi
 
 # Configure device-specific settings
 case $XMOS_DEVICE in
-  xvf3[56]10)
+  xvf3[56]10-ua)
+    UA_MODE=y
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_ua
+    ;;
+
+  xvf3[56]10-int)
     I2S_MODE=master
     DAC_SETUP=y
-    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_int
     ;;
   xvf3500)
     I2S_MODE=slave
@@ -77,7 +126,7 @@ sudo apt-get install -y python3-numpy
 sudo apt-get install -y libatlas-base-dev
 
 echo  "Installing necessary packages for dev kit"
-sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev
+sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev libevdev-dev libudev-dev
 
 # Build I2S kernel module
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
@@ -85,37 +134,44 @@ if [[ $PI_MODEL = 4 ]]; then
   I2S_MODULE_CFLAGS="-DRPI_4B"
 fi
 
-case $I2S_MODE in
-  master)
-    if [[ -z "$I2S_MODULE_CFLAGS" ]]; then
-      I2S_MODULE_CFLAGS=-DI2S_MASTER
-    else
-      I2S_MODULE_CFLAGS="$I2S_MODULE_CFLAGS -DI2S_MASTER"
-    fi
+if [[ -n "$I2S_MODE" ]]; then
+  case $I2S_MODE in
+    master)
+      if [[ -z "$I2S_MODULE_CFLAGS" ]]; then
+        I2S_MODULE_CFLAGS=-DI2S_MASTER
+      else
+        I2S_MODULE_CFLAGS="$I2S_MODULE_CFLAGS -DI2S_MASTER"
+       fi
+      ;;
+    slave)
+      # no flags needed for I2S slave compilation
+      ;;
+    *)
+      echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
+      exit 1
     ;;
-  slave)
-    # no flags needed for I2S slave compilation
-    ;;
-  *)
-    echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
+  esac
+  I2S_BUILD_DIR=$RPI_SETUP_DIR/loader/i2s_$I2S_MODE
+  pushd $I2S_BUILD_DIR > /dev/null
+  if [[ -n "$I2S_MODULE_CFLAGS" ]]; then
+    CMD="make CFLAGS_MODULE='$I2S_MODULE_CFLAGS'"
+  else
+    CMD=make
+  fi
+  echo $CMD
+  eval $CMD
+  if [[ $? -ne 0 ]]; then
+    echo "Error: I2S kernel module build failed"
     exit 1
-  ;;
-esac
-I2S_BUILD_DIR=$RPI_SETUP_DIR/loader/i2s_$I2S_MODE
-pushd $I2S_BUILD_DIR > /dev/null
-if [[ -n "$I2S_MODULE_CFLAGS" ]]; then
-  CMD="make CFLAGS_MODULE='$I2S_MODULE_CFLAGS'"
-else
-  CMD=make
-fi
-echo $CMD
-eval $CMD
-if [[ $? -ne 0 ]]; then
-  echo "Error: I2S kernel module build failed"
-  exit 1
+  fi
 fi
 
 popd > /dev/null
+
+# Copy the udev rules files if device is UA
+if [[ -n "$UA_MODE" ]]; then
+  sudo cp $RPI_SETUP_DIR/resources/99-xmos.rules /etc/udev/rules.d/
+fi
 
 # Move existing files to back up
 if [[ -e ~/.asoundrc ]]; then
@@ -140,28 +196,25 @@ chmod a-w ~/.asoundrc
 # Apply changes
 sudo /etc/init.d/alsa-utils restart
 
-# Create the script to run after each reboot and make the soundcard available
-i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
-rm -f $i2s_driver_script
+if [[ -n "$I2S_MODE" ]]; then
+    # Create the script to run after each reboot and make the soundcard available
+    i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
+    rm -f $i2s_driver_script
 
-# Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
-# According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
-# this bit is set after 2 PCM clocks have occurred.
-# To avoid this issue we add a 1-second delay before the drivers are loaded
-echo "sleep 1"  >> $i2s_driver_script
+    # Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
+    # According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
+    # this bit is set after 2 PCM clocks have occurred.
+    # To avoid this issue we add a 1-second delay before the drivers are loaded
+    echo "sleep 1"  >> $i2s_driver_script
 
-if [[ -z "$I2S_MODE" ]]; then
-  echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
-  exit 1
+    I2S_NAME=i2s_$I2S_MODE
+    I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
+    echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
+
+    echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
+    echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
+    echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
 fi
-
-I2S_NAME=i2s_$I2S_MODE
-I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
-echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
-
-echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
-echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
-echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
 
 if [[ -n "$DAC_SETUP" ]]; then
   pushd $RPI_SETUP_DIR/resources/clk_dac_setup/ > /dev/null
@@ -194,13 +247,19 @@ if [[ -n "$DAC_SETUP" ]]; then
 fi
 
 # Setup the crontab to restart I2S at reboot
-rm -f $RPI_SETUP_DIR/resources/crontab
-echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
-if [[ -n "$DAC_SETUP" ]]; then
-  echo "@reboot sh $dac_and_clks_script" >> $RPI_SETUP_DIR/resources/crontab
-fi
-crontab $RPI_SETUP_DIR/resources/crontab
+if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
+  rm -f $RPI_SETUP_DIR/resources/crontab
 
-echo "To enable I2S, I2C and SPI, this Raspberry Pi must be rebooted."
+  if [[ -n "$I2S_MODE" ]]; then
+    echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
+  fi
 
+  if [[ -n "$DAC_SETUP" ]]; then
+    echo "@reboot sh $dac_and_clks_script" >> $RPI_SETUP_DIR/resources/crontab
+  fi
+  crontab $RPI_SETUP_DIR/resources/crontab
 popd > /dev/null
+fi
+
+echo "To enable all interfaces, this Raspberry Pi must be rebooted."
+
