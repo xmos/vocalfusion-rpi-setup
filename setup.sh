@@ -121,17 +121,18 @@ if ! dpkg -s $KERNEL_HEADERS_PACKAGE &> /dev/null; then
 fi
 
 echo "Installing the Python3 packages and related libs"
-sudo apt-get install -y python3-matplotlib || echo "Package Iinstallation failed" && exit 1
-sudo apt-get install -y python3-numpy|| echo "Package Iinstallation failed" && exit 1
-sudo apt-get install -y libatlas-base-dev || echo "Package Iinstallation failed" && exit 1
+sudo apt-get install -y python3-matplotlib || echo "Package installation failed" && exit 1
+sudo apt-get install -y python3-numpy || echo "Package installation failed" && exit 1
+sudo apt-get install -y libatlas-base-dev || echo "Package installation failed" && exit 1
 
 echo  "Installing necessary packages for dev kit"
-sudo apt-get install -y libusb-1.0-0-dev || echo "Package Iinstallation failed" && exit 1
-sudo apt-get install -y libreadline-dev || echo "Package Iinstallation failed" && exit 1
-sudo apt-get install -y libncurses-dev || echo "Package Iinstallation failed" && exit 1
+sudo apt-get install -y audacity || echo "Package installation failed" && exit 1
+sudo apt-get install -y libreadline-dev || echo "Package installation failed" && exit 1
+sudo apt-get install -y libncurses-dev || echo "Package installation failed" && exit 1
 if [[ -n "$UA_MODE" ]]; then
-  sudo apt-get install -y libevdev-dev  || echo "Package Iinstallation failed" && exit 1
-  sudo apt-get install -y libudev-dev || echo "Package Iinstallation failed" && exit 1
+  sudo apt-get install -y libusb-1.0-0-dev || echo "Package installation failed" && exit 1
+  sudo apt-get install -y libevdev-dev  || echo "Package installation failed" && exit 1
+  sudo apt-get install -y libudev-dev || echo "Package installation failed" && exit 1
 fi
 
 # Build I2S kernel module
@@ -238,7 +239,6 @@ if [[ -n "$DAC_SETUP" ]]; then
   echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf.py $(echo $XMOS_DEVICE | cut -c1-7)" >> $dac_and_clks_script
 fi
 
-sudo apt-get install -y audacity
 if [[ -n "$DAC_SETUP" ]]; then
   audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
   rm -f $audacity_script
