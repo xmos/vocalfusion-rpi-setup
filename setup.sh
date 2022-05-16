@@ -121,18 +121,18 @@ if ! dpkg -s $KERNEL_HEADERS_PACKAGE &> /dev/null; then
 fi
 
 echo "Installing the Python3 packages and related libs"
-sudo apt-get install -y python3-matplotlib || echo "Package installation failed" && exit 1
-sudo apt-get install -y python3-numpy || echo "Package installation failed" && exit 1
-sudo apt-get install -y libatlas-base-dev || echo "Package installation failed" && exit 1
+sudo apt-get install -y python3-matplotlib || ( echo "Package installation failed" ; exit 1)
+sudo apt-get install -y python3-numpy || ( echo "Package installation failed" ; exit 1)
+sudo apt-get install -y libatlas-base-dev || ( echo "Package installation failed" ; exit 1)
 
 echo  "Installing necessary packages for dev kit"
-sudo apt-get install -y audacity || echo "Package installation failed" && exit 1
-sudo apt-get install -y libreadline-dev || echo "Package installation failed" && exit 1
-sudo apt-get install -y libncurses-dev || echo "Package installation failed" && exit 1
+sudo apt-get install -y audacity || ( echo "Package installation failed" ; exit 1)
+sudo apt-get install -y libreadline-dev || ( echo "Package installation failed" ; exit 1)
+sudo apt-get install -y libncurses-dev || ( echo "Package installation failed" ; exit 1)
 if [[ -n "$UA_MODE" ]]; then
-  sudo apt-get install -y libusb-1.0-0-dev || echo "Package installation failed" && exit 1
-  sudo apt-get install -y libevdev-dev  || echo "Package installation failed" && exit 1
-  sudo apt-get install -y libudev-dev || echo "Package installation failed" && exit 1
+  sudo apt-get install -y libusb-1.0-0-dev || ( echo "Package installation failed" ; exit 1)
+  sudo apt-get install -y libevdev-dev || ( echo "Package installation failed" ; exit 1)
+  sudo apt-get install -y libudev-dev || ( echo "Package installation failed" ; exit 1)
 fi
 
 # Build I2S kernel module
@@ -177,6 +177,7 @@ popd > /dev/null
 
 # Copy the udev rules files if device is UA
 if [[ -n "$UA_MODE" ]]; then
+  echo "Add UDEV rules for XMOS devices"
   sudo cp $RPI_SETUP_DIR/resources/99-xmos.rules /etc/udev/rules.d/
 fi
 
