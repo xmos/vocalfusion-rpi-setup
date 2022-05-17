@@ -56,13 +56,13 @@ else
 fi
 
 # Configure device-specific settings
-case $XMOS_DEVICE in
-  xvf3[56]10-ua)
+case $XMOS_DEVICE in 
+  xvf3510-ua|xvf3610-ua|xvf615-ua)
     UA_MODE=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_ua
     ;;
 
-  xvf3[56]10-int)
+  xvf3510-int|xvf3610-int|xvf3615-int)
     I2S_MODE=master
     DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_int
@@ -71,7 +71,7 @@ case $XMOS_DEVICE in
     I2S_MODE=slave
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_stereo
     ;;
-  xvf3100)
+  xvf3[01]00)
     I2S_MODE=slave
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
@@ -86,7 +86,7 @@ case $XMOS_DEVICE in
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
   *)
-    echo error: unknown XMOS device type $XMOS_DEVICE.
+    echo Error: unknown XMOS device type $XMOS_DEVICE.
     exit 1
   ;;
 esac
@@ -154,7 +154,7 @@ if [[ -n "$I2S_MODE" ]]; then
       # no flags needed for I2S slave compilation
       ;;
     *)
-      echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
+      echo Error: I2S mode not known for XMOS device $XMOS_DEVICE.
       exit 1
     ;;
   esac
@@ -192,7 +192,7 @@ fi
 
 # Check XMOS device for asoundrc selection.
 if [[ -z "$ASOUNDRC_TEMPLATE" ]]; then
-  echo error: sound card config not known for XMOS device $XMOS_DEVICE.
+  echo Error: sound card config not known for XMOS device $XMOS_DEVICE.
   exit 1
 fi
 cp $ASOUNDRC_TEMPLATE ~/.asoundrc
