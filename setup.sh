@@ -8,6 +8,9 @@ XMOS_DEVICE=
 # Valid values for XMOS device
 VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510-int xvf3510-ua xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua"
 
+PACKAGES_TO_INSTALL="python3-matplotlib python3-numpy libatlas-base-dev audacity libreadline-dev libncurses-dev"
+PACKAGES_TO_INSTALL_ONLY_FOR_UA="libusb-1.0-0-dev libevdev-dev libudev-dev"
+
 usage() {
   local VALID_XMOS_DEVICES_DISPLAY_STRING=
   local NUMBER_OF_VALID_DEVICES=$(echo $VALID_XMOS_DEVICES | wc -w)
@@ -57,7 +60,7 @@ fi
 
 # Configure device-specific settings
 case $XMOS_DEVICE in 
-  xvf3510-ua|xvf3610-ua|xvf615-ua)
+  xvf3510-ua|xvf3610-ua|xvf3615-ua)
     UA_MODE=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_ua
     ;;
@@ -120,20 +123,15 @@ if ! dpkg -s $KERNEL_HEADERS_PACKAGE &> /dev/null; then
   sudo apt-get install -y $KERNEL_HEADERS_PACKAGE
 fi
 
-echo "Installing the Python3 packages and related libs"
-sudo apt-get install -y python3-matplotlib || ( echo "Error: Package installation failed" ; exit 1 )
-sudo apt-get install -y python3-numpy || ( echo "Error: Package installation failed" ; exit 1 )
-sudo apt-get install -y libatlas-base-dev || ( echo "Error: Package installation failed" ; exit 1 )
-
 echo  "Installing necessary packages for dev kit"
-sudo apt-get install -y audacity || ( echo "Error: Package installation failed" ; exit 1 )
-sudo apt-get install -y libreadline-dev || ( echo "Error: Package installation failed" ; exit 1 )
-sudo apt-get install -y libncurses-dev || ( echo "Error: Package installation failed" ; exit 1 )
+packages=$PACKAGES_TO_INSTALL
+# Add packages for UA mode
 if [[ -n "$UA_MODE" ]]; then
-  sudo apt-get install -y libusb-1.0-0-dev || ( echo "Error: Package installation failed" ; exit 1 )
-  sudo apt-get install -y libevdev-dev || ( echo "Error: Package installation failed" ; exit 1 )
-  sudo apt-get install -y libudev-dev || ( echo "Error: Package installation failed" ; exit 1 )
+  packages="$packages $PACKAGES_TO_INSTALL_ONLY_FOR_UA"
 fi
+for package in $packages; do
+  sudo apt-get install -y $package || ( echo "Error: installation of package $package failed" ; exit 1 )
+done
 
 # Build I2S kernel module
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
@@ -269,3 +267,4 @@ popd > /dev/null
 fi
 
 echo "To enable all interfaces, this Raspberry Pi must be rebooted."
+
