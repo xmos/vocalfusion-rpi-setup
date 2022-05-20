@@ -6,7 +6,10 @@ I2S_MODE=
 XMOS_DEVICE=
 
 # Valid values for XMOS device
-VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510 xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua"
+VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510-int xvf3510-ua xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua"
+
+PACKAGES_TO_INSTALL="python3-matplotlib python3-numpy libatlas-base-dev audacity libreadline-dev libncurses-dev"
+PACKAGES_TO_INSTALL_ONLY_FOR_UA="libusb-1.0-0-dev libevdev-dev libudev-dev"
 
 usage() {
   local VALID_XMOS_DEVICES_DISPLAY_STRING=
@@ -56,13 +59,13 @@ else
 fi
 
 # Configure device-specific settings
-case $XMOS_DEVICE in
-  xvf3[56]10-ua)
+case $XMOS_DEVICE in 
+  xvf3510-ua|xvf3610-ua|xvf3615-ua)
     UA_MODE=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_ua
     ;;
 
-  xvf3[56]10-int)
+  xvf3510-int|xvf3610-int|xvf3615-int)
     I2S_MODE=master
     DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_int
@@ -71,7 +74,7 @@ case $XMOS_DEVICE in
     I2S_MODE=slave
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_stereo
     ;;
-  xvf3100)
+  xvf3[01]00)
     I2S_MODE=slave
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
@@ -86,7 +89,7 @@ case $XMOS_DEVICE in
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
   *)
-    echo error: unknown XMOS device type $XMOS_DEVICE.
+    echo Error: unknown XMOS device type $XMOS_DEVICE.
     exit 1
   ;;
 esac
@@ -116,17 +119,19 @@ sudo raspi-config nonint do_spi 0
 # been tested and verified.
 KERNEL_HEADERS_PACKAGE=raspberrypi-kernel-headers
 if ! dpkg -s $KERNEL_HEADERS_PACKAGE &> /dev/null; then
-    echo "Installing Raspberry Pi kernel headers"
-    sudo apt-get install -y $KERNEL_HEADERS_PACKAGE
+  echo "Installing Raspberry Pi kernel headers"
+  sudo apt-get install -y $KERNEL_HEADERS_PACKAGE
 fi
 
-echo "Installing the Python3 packages and related libs"
-sudo apt-get install -y python3-matplotlib
-sudo apt-get install -y python3-numpy
-sudo apt-get install -y libatlas-base-dev
-
 echo  "Installing necessary packages for dev kit"
-sudo apt-get install -y libusb-1.0-0-dev libreadline-dev libncurses-dev libevdev-dev libudev-dev
+packages=$PACKAGES_TO_INSTALL
+# Add packages for UA mode
+if [[ -n "$UA_MODE" ]]; then
+  packages="$packages $PACKAGES_TO_INSTALL_ONLY_FOR_UA"
+fi
+for package in $packages; do
+  sudo apt-get install -y $package || ( echo "Error: installation of package $package failed" ; exit 1 )
+done
 
 # Build I2S kernel module
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
@@ -147,7 +152,7 @@ if [[ -n "$I2S_MODE" ]]; then
       # no flags needed for I2S slave compilation
       ;;
     *)
-      echo error: I2S mode not known for XMOS device $XMOS_DEVICE.
+      echo Error: I2S mode not known for XMOS device $XMOS_DEVICE.
       exit 1
     ;;
   esac
@@ -170,6 +175,7 @@ popd > /dev/null
 
 # Copy the udev rules files if device is UA
 if [[ -n "$UA_MODE" ]]; then
+  echo "Add UDEV rules for XMOS devices"
   sudo cp $RPI_SETUP_DIR/resources/99-xmos.rules /etc/udev/rules.d/
 fi
 
@@ -184,7 +190,7 @@ fi
 
 # Check XMOS device for asoundrc selection.
 if [[ -z "$ASOUNDRC_TEMPLATE" ]]; then
-  echo error: sound card config not known for XMOS device $XMOS_DEVICE.
+  echo Error: sound card config not known for XMOS device $XMOS_DEVICE.
   exit 1
 fi
 cp $ASOUNDRC_TEMPLATE ~/.asoundrc
@@ -197,23 +203,23 @@ chmod a-w ~/.asoundrc
 sudo /etc/init.d/alsa-utils restart
 
 if [[ -n "$I2S_MODE" ]]; then
-    # Create the script to run after each reboot and make the soundcard available
-    i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
-    rm -f $i2s_driver_script
+  # Create the script to run after each reboot and make the soundcard available
+  i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
+  rm -f $i2s_driver_script
 
-    # Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
-    # According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
-    # this bit is set after 2 PCM clocks have occurred.
-    # To avoid this issue we add a 1-second delay before the drivers are loaded
-    echo "sleep 1"  >> $i2s_driver_script
+  # Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
+  # According to section 8.8 of https://cs140e.sergio.bz/docs/BCM2837-ARM-Peripherals.pdf
+  # this bit is set after 2 PCM clocks have occurred.
+  # To avoid this issue we add a 1-second delay before the drivers are loaded
+  echo "sleep 1"  >> $i2s_driver_script
 
-    I2S_NAME=i2s_$I2S_MODE
-    I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
-    echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
+  I2S_NAME=i2s_$I2S_MODE
+  I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
+  echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
 
-    echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
-    echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
-    echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
+  echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
+  echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
+  echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
 fi
 
 if [[ -n "$DAC_SETUP" ]]; then
@@ -232,7 +238,6 @@ if [[ -n "$DAC_SETUP" ]]; then
   echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf.py $(echo $XMOS_DEVICE | cut -c1-7)" >> $dac_and_clks_script
 fi
 
-sudo apt-get install -y audacity
 if [[ -n "$DAC_SETUP" ]]; then
   audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
   rm -f $audacity_script

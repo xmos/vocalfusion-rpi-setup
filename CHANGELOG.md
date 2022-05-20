@@ -1,5 +1,12 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.1.0
+
+  * Added support for xvf3510-ua
+  * Renamed xvf3510 device as xvf3510-int
+  * Fix bug in parsing of device names
+  * Install one Debian package at the time
+
 ## 5.0.0
 
   * Added support for xvf3610-ua and xvf3615-ua
