@@ -133,7 +133,6 @@ for package in $packages; do
   installed=0
   attempt_num=0
   while [ $installed -eq 0 ]; do
-    sleep 2
     attempt_num=$((attempt_num+1))
     sudo apt-get install -y $package && installed=1
     if [[ $attempt_num -gt $INSTALL_ATTEMPT_NUM_MAX ]]; then
