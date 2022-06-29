@@ -4,7 +4,7 @@ RPI_SETUP_DIR="$( pwd )"
 
 I2S_MODE=
 XMOS_DEVICE=
-
+INSTALL_ATTEMPT_NUM_MAX=10
 # Valid values for XMOS device
 VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510-int xvf3510-ua xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua"
 
@@ -133,10 +133,12 @@ for package in $packages; do
   installed=0
   attempt_num=0
   while [ $installed -eq 0 ]; do
+    sleep 2
     attempt_num=$((attempt_num+1))
     sudo apt-get install -y $package && installed=1
-    if [[ $attempt_num -gt 2 ]]; then
-	    echo "Error: installation of package $package failed after $attempt_num attempts"
+    if [[ $attempt_num -gt $INSTALL_ATTEMPT_NUM_MAX ]]; then
+      echo "Error: installation of package $package failed after $attempt_num attempts"
+      echo "Please retry installation procedure."
       exit 1
     fi
   done
