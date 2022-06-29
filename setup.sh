@@ -45,7 +45,7 @@ validate_device() {
   return 1
 }
 
-if [[ $# == 1 ]]; then
+if [[ $# -eq 1 ]]; then
   XMOS_DEVICE=$1
   if ! validate_device $XMOS_DEVICE $VALID_XMOS_DEVICES; then
     echo "error: $XMOS_DEVICE is not a valid device type."
@@ -130,12 +130,20 @@ if [[ -n "$UA_MODE" ]]; then
   packages="$packages $PACKAGES_TO_INSTALL_ONLY_FOR_UA"
 fi
 for package in $packages; do
-  sudo apt-get install -y $package || ( echo "Error: installation of package $package failed" ; exit 1 )
+  installed=0
+  attempt_num=0
+  while [ $installed -eq 0 ]; do
+    attempt_num=$((attempt_num+1))
+    sudo apt-get install -y $package && installed=1
+    if [[ $attempt_num -gt 2 ]]; then
+	    echo "Error: installation of package $package failed after $attempt_num attempts"
+      exit 1
+    fi
+  done
 done
-
 # Build I2S kernel module
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
-if [[ $PI_MODEL = 4 ]]; then
+if [[ $PI_MODEL -eq 4 ]]; then
   I2S_MODULE_CFLAGS="-DRPI_4B"
 fi
 
@@ -229,7 +237,7 @@ if [[ -n "$DAC_SETUP" ]]; then
   dac_and_clks_script=$RPI_SETUP_DIR/resources/init_dac_and_clks.sh
   rm -f $dac_and_clks_script
   # Configure the clocks only if RaspberryPi is configured as I2S master
-  if [[ "$I2S_MODE" == "master" ]]; then
+  if [[ "$I2S_MODE" = "master" ]]; then
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"                  >> $dac_and_clks_script
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $dac_and_clks_script
   fi
@@ -244,7 +252,7 @@ if [[ -n "$DAC_SETUP" ]]; then
   echo "#!/usr/bin/env bash" >> $audacity_script
   echo "/usr/bin/audacity &" >> $audacity_script
   echo "sleep 5" >> $audacity_script
-  if [[ "$I2S_MODE" == "master" ]]; then
+  if [[ "$I2S_MODE" = "master" ]]; then
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null" >> $audacity_script
   fi
   sudo chmod +x $audacity_script
