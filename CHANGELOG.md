@@ -2,7 +2,7 @@
 
 ## 5.2.0
 
-  * Added copy of asoundrc file at bootup
+  * Added copying of asoundrc file at bootup
   * Fixed checks for installation of debian packages
   * Updated equality operators
 
