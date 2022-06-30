@@ -188,6 +188,32 @@ if [[ -n "$UA_MODE" ]]; then
   sudo cp $RPI_SETUP_DIR/resources/99-xmos.rules /etc/udev/rules.d/
 fi
 
+# Move existing files to back up
+if [[ -e ~/.asoundrc ]]; then
+  chmod a+w ~/.asoundrc
+  cp ~/.asoundrc ~/.asoundrc.bak
+fi
+if [[ -e /usr/share/alsa/pulse-alsa.conf ]]; then
+  sudo mv /usr/share/alsa/pulse-alsa.conf  /usr/share/alsa/pulse-alsa.conf.bak
+fi
+
+# Check XMOS device for asoundrc selection.
+if [[ -z "$ASOUNDRC_TEMPLATE" ]]; then
+  echo Error: sound card config not known for XMOS device $XMOS_DEVICE.
+  exit 1
+fi
+
+# Setup the crontab to copy the .asoundrc file at reboot
+# This is needed to address the known issue:
+# https://forums.raspberrypi.com/viewtopic.php?t=295008
+rm -f $RPI_SETUP_DIR/resources/crontab
+cp $ASOUNDRC_TEMPLATE ~/.asoundrc
+
+
+# Make the asoundrc file read-only otherwise lxpanel rewrites it
+# as it doesn't support anything but a hardware type device
+chmod a-w ~/.asoundrc
+
 # Apply changes
 sudo /etc/init.d/alsa-utils restart
 
@@ -240,9 +266,6 @@ if [[ -n "$DAC_SETUP" ]]; then
   sudo mv $audacity_script /usr/local/bin/audacity
 fi
 
-# Replace crontab tasks
-rm -f $RPI_SETUP_DIR/resources/crontab
-
 # Setup the crontab to restart I2S at reboot
 if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
   if [[ -n "$I2S_MODE" ]]; then
@@ -254,29 +277,6 @@ if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
   fi
 popd > /dev/null
 fi
-
-# Move existing files to back up
-if [[ -e ~/.asoundrc ]]; then
-  chmod a+w ~/.asoundrc
-  cp ~/.asoundrc ~/.asoundrc.bak
-fi
-if [[ -e /usr/share/alsa/pulse-alsa.conf ]]; then
-  sudo mv /usr/share/alsa/pulse-alsa.conf  /usr/share/alsa/pulse-alsa.conf.bak
-fi
-
-# Check XMOS device for asoundrc selection.
-if [[ -z "$ASOUNDRC_TEMPLATE" ]]; then
-  echo Error: sound card config not known for XMOS device $XMOS_DEVICE.
-  exit 1
-fi
-
-
-# Setup the crontab to copy the .asoundrc file at reboot after few seconds
-# This is needed to address the known issue:
-# https://forums.raspberrypi.com/viewtopic.php?t=295008
-echo "@reboot sleep 10 && cp $ASOUNDRC_TEMPLATE ~/.asoundrc" >> $RPI_SETUP_DIR/resources/crontab
-
-
 # Update crontab
 crontab $RPI_SETUP_DIR/resources/crontab
 
