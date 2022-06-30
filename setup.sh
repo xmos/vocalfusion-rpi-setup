@@ -203,17 +203,6 @@ if [[ -z "$ASOUNDRC_TEMPLATE" ]]; then
   exit 1
 fi
 
-# Setup the crontab to copy the .asoundrc file at reboot
-# This is needed to address the known issue:
-# https://forums.raspberrypi.com/viewtopic.php?t=295008
-rm -f $RPI_SETUP_DIR/resources/crontab
-cp $ASOUNDRC_TEMPLATE ~/.asoundrc
-
-
-# Make the asoundrc file read-only otherwise lxpanel rewrites it
-# as it doesn't support anything but a hardware type device
-chmod a-w ~/.asoundrc
-
 # Apply changes
 sudo /etc/init.d/alsa-utils restart
 
@@ -266,6 +255,9 @@ if [[ -n "$DAC_SETUP" ]]; then
   sudo mv $audacity_script /usr/local/bin/audacity
 fi
 
+# Regenerate crontab file with new commands
+rm -f $RPI_SETUP_DIR/resources/crontab
+
 # Setup the crontab to restart I2S at reboot
 if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
   if [[ -n "$I2S_MODE" ]]; then
@@ -277,6 +269,12 @@ if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
   fi
 popd > /dev/null
 fi
+# Setup the crontab to copy the .asoundrc file at reboot
+# Delay the action by 10 seconds to allow the host to boot up
+# This is needed to address the known issue:
+# https://forums.raspberrypi.com/viewtopic.php?t=295008
+echo "@reboot sleep 10 && cp $ASOUNDRC_TEMPLATE ~/.asoundrc" >> $RPI_SETUP_DIR/resources/crontab
+
 # Update crontab
 crontab $RPI_SETUP_DIR/resources/crontab
 
