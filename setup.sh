@@ -4,7 +4,7 @@ RPI_SETUP_DIR="$( pwd )"
 
 I2S_MODE=
 XMOS_DEVICE=
-
+INSTALL_ATTEMPT_NUM_MAX=10
 # Valid values for XMOS device
 VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510-int xvf3510-ua xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua"
 
@@ -45,7 +45,7 @@ validate_device() {
   return 1
 }
 
-if [[ $# == 1 ]]; then
+if [[ $# -eq 1 ]]; then
   XMOS_DEVICE=$1
   if ! validate_device $XMOS_DEVICE $VALID_XMOS_DEVICES; then
     echo "error: $XMOS_DEVICE is not a valid device type."
@@ -130,12 +130,21 @@ if [[ -n "$UA_MODE" ]]; then
   packages="$packages $PACKAGES_TO_INSTALL_ONLY_FOR_UA"
 fi
 for package in $packages; do
-  sudo apt-get install -y $package || ( echo "Error: installation of package $package failed" ; exit 1 )
+  installed=0
+  attempt_num=0
+  while [ $installed -eq 0 ]; do
+    attempt_num=$((attempt_num+1))
+    sudo apt-get install -y $package && installed=1
+    if [[ $attempt_num -gt $INSTALL_ATTEMPT_NUM_MAX ]]; then
+      echo "Error: installation of package $package failed after $attempt_num attempts"
+      echo "Please retry installation procedure."
+      exit 1
+    fi
+  done
 done
-
 # Build I2S kernel module
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
-if [[ $PI_MODEL = 4 ]]; then
+if [[ $PI_MODEL -eq 4 ]]; then
   I2S_MODULE_CFLAGS="-DRPI_4B"
 fi
 
@@ -193,11 +202,6 @@ if [[ -z "$ASOUNDRC_TEMPLATE" ]]; then
   echo Error: sound card config not known for XMOS device $XMOS_DEVICE.
   exit 1
 fi
-cp $ASOUNDRC_TEMPLATE ~/.asoundrc
-
-# Make the asoundrc file read-only otherwise lxpanel rewrites it
-# as it doesn't support anything but a hardware type device
-chmod a-w ~/.asoundrc
 
 # Apply changes
 sudo /etc/init.d/alsa-utils restart
@@ -229,7 +233,7 @@ if [[ -n "$DAC_SETUP" ]]; then
   dac_and_clks_script=$RPI_SETUP_DIR/resources/init_dac_and_clks.sh
   rm -f $dac_and_clks_script
   # Configure the clocks only if RaspberryPi is configured as I2S master
-  if [[ "$I2S_MODE" == "master" ]]; then
+  if [[ "$I2S_MODE" = "master" ]]; then
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_mclk"                  >> $dac_and_clks_script
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $dac_and_clks_script
   fi
@@ -244,17 +248,18 @@ if [[ -n "$DAC_SETUP" ]]; then
   echo "#!/usr/bin/env bash" >> $audacity_script
   echo "/usr/bin/audacity &" >> $audacity_script
   echo "sleep 5" >> $audacity_script
-  if [[ "$I2S_MODE" == "master" ]]; then
+  if [[ "$I2S_MODE" = "master" ]]; then
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk >> /dev/null" >> $audacity_script
   fi
   sudo chmod +x $audacity_script
   sudo mv $audacity_script /usr/local/bin/audacity
 fi
 
+# Regenerate crontab file with new commands
+rm -f $RPI_SETUP_DIR/resources/crontab
+
 # Setup the crontab to restart I2S at reboot
 if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
-  rm -f $RPI_SETUP_DIR/resources/crontab
-
   if [[ -n "$I2S_MODE" ]]; then
     echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
   fi
@@ -262,9 +267,16 @@ if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
   if [[ -n "$DAC_SETUP" ]]; then
     echo "@reboot sh $dac_and_clks_script" >> $RPI_SETUP_DIR/resources/crontab
   fi
-  crontab $RPI_SETUP_DIR/resources/crontab
 popd > /dev/null
 fi
+# Setup the crontab to copy the .asoundrc file at reboot
+# Delay the action by 10 seconds to allow the host to boot up
+# This is needed to address the known issue in Raspian Buster:
+# https://forums.raspberrypi.com/viewtopic.php?t=295008
+echo "@reboot sleep 10 && cp $ASOUNDRC_TEMPLATE ~/.asoundrc" >> $RPI_SETUP_DIR/resources/crontab
+
+# Update crontab
+crontab $RPI_SETUP_DIR/resources/crontab
 
 echo "To enable all interfaces, this Raspberry Pi must be rebooted."
 

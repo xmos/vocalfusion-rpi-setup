@@ -1,5 +1,11 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.2.0
+
+  * Added copying of asoundrc file at bootup
+  * Fixed checks for installation of debian packages
+  * Updated equality operators
+
 ## 5.1.0
 
   * Added support for xvf3510-ua
