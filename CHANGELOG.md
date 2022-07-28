@@ -1,5 +1,10 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.3.0
+
+  * Save crontab settings in 'resources' directory
+  * Use different names for I2S slave and master scripts
+
 ## 5.2.0
 
   * Added copying of asoundrc file at bootup
