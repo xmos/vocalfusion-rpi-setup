@@ -258,7 +258,7 @@ fi
 
 # Regenerate crontab file with new commands
 crontab_file=$RPI_SETUP_DIR/resources/crontab
-if [ - n "UA_MODE" ]; then
+if [ -n "UA_MODE" ]; then
     crontab_file="${crontab_file}_ua"
 elif [ -n "I2S_MODE" ]; then
     crontab_file="${crontab_file}_i2s_${I2S_MODE}"
