@@ -2,6 +2,7 @@
 
 ## 5.3.0
 
+  * Fix setup_dac.py script for XVF3615
   * Save crontab settings in 'resources' directory
   * Use different names for I2S slave and master scripts
 
