@@ -61,7 +61,7 @@ fi
 # Configure device-specific settings
 case $XMOS_DEVICE in 
   xvf3510-ua|xvf3610-ua|xvf3615-ua)
-    UA_MODE=y
+    USB_MODE=y
     I2S_MODE=slave
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_ua
     ;;
@@ -127,7 +127,7 @@ fi
 echo  "Installing necessary packages for dev kit"
 packages=$PACKAGES_TO_INSTALL
 # Add packages for UA mode
-if [[ -n "$UA_MODE" ]]; then
+if [[ -n "$USB_MODE" ]]; then
   packages="$packages $PACKAGES_TO_INSTALL_ONLY_FOR_UA"
 fi
 for package in $packages; do
@@ -184,7 +184,7 @@ fi
 popd > /dev/null
 
 # Copy the udev rules files if device is UA
-if [[ -n "$UA_MODE" ]]; then
+if [[ -n "$USB_MODE" ]]; then
   echo "Add UDEV rules for XMOS devices"
   sudo cp $RPI_SETUP_DIR/resources/99-xmos.rules /etc/udev/rules.d/
 fi
@@ -258,8 +258,8 @@ fi
 
 # Regenerate crontab file with new commands
 crontab_file=$RPI_SETUP_DIR/resources/crontab
-if [ -n "UA_MODE" ]; then
-    crontab_file="${crontab_file}_ua"
+if [ -n "USB_MODE" ]; then
+    crontab_file="${crontab_file}_usb"
 elif [ -n "I2S_MODE" ]; then
     crontab_file="${crontab_file}_i2s_${I2S_MODE}"
 fi
