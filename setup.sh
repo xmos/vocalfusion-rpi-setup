@@ -62,6 +62,7 @@ fi
 case $XMOS_DEVICE in 
   xvf3510-ua|xvf3610-ua|xvf3615-ua)
     UA_MODE=y
+    I2S_MODE=slave
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_ua
     ;;
 
