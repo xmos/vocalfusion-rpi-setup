@@ -258,9 +258,9 @@ fi
 
 # Regenerate crontab file with new commands
 crontab_file=$RPI_SETUP_DIR/resources/crontab
-if [ -n "USB_MODE" ]; then
+if [ -n "$USB_MODE" ]; then
     crontab_file="${crontab_file}_usb"
-elif [ -n "I2S_MODE" ]; then
+elif [ -n "$I2S_MODE" ]; then
     crontab_file="${crontab_file}_i2s_${I2S_MODE}"
 fi
 
