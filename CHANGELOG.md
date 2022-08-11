@@ -3,7 +3,7 @@
 ## 5.3.0
 
   * Fix setup_dac.py script for XVF3615
-  * Build I2S drivers for UA XVF3610 setup
+  * Build I2S slave drivers for UA XVF3610 setup
   * Save crontab settings in 'resources' directory
   * Use different names for I2S slave and master scripts
 
