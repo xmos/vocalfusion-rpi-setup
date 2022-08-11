@@ -59,7 +59,7 @@ else
 fi
 
 # Configure device-specific settings
-case $XMOS_DEVICE in 
+case $XMOS_DEVICE in
   xvf3510-ua|xvf3610-ua|xvf3615-ua)
     USB_MODE=y
     I2S_MODE=slave
