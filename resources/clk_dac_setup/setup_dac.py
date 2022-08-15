@@ -1,5 +1,5 @@
 #!usr/bin/python
-# Copyright (c) 2018-2021, XMOS Ltd, All rights reserved
+# Copyright (c) 2018-2022, XMOS Ltd, All rights reserved
 
 #run this on the raspberry pi to program the DAC
 
@@ -23,7 +23,7 @@ def setup_dac(args):
 
     I2C_EXPANDER_ADDRESS = 0x20
 
-    if args.hw == "xvf3600" or args.hw == "xvf3610" :
+    if "xvf36" in args.hw:
 
         # I2C expander register addresses
         I2C_EXPANDER_OUTPUT_PORT_REG = 0x01
@@ -55,12 +55,12 @@ def setup_dac(args):
         # Configure pin directions. Setting to 1 means input, or Hi-Z. So anything not mentioned
         # below will be an output. Note reset, int and boot_sel NOT driven because they are set high in the mask
         # use DAC_RST_N and level shift OE as driven outputs
-        # Configure the mute pin as input only for XVF3610
+        # Configure the mute pin as input only for XVF361x
         if args.hw == "xvf3600":
             CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
                                  (1<<INT_N_PIN)     | \
                                  (1<<BOOT_SEL_PIN)
-        elif args.hw == "xvf3610":
+        elif "xvf361" in args.hw:
             CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
                                  (1<<INT_N_PIN)     | \
                                  (1<<BOOT_SEL_PIN)  | \
@@ -69,8 +69,8 @@ def setup_dac(args):
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_CONFIGURATION_REG, CONFIGURATION_MASK)
         time.sleep(0.1)
 
-        # Enable the interrupt on INT_N pin for XVF3610
-        if args.hw == "xvf3610":
+        # Enable the interrupt on INT_N pin for XVF361x
+        if "xvf361" in args.hw:
             # Interrupts are enabled by setting corresponding mask bits to logic 0
             INTERRUPT_MASK = 0xFF & ~(1<<INT_N_PIN)
             bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INTERRUPT_MASK_REG, INTERRUPT_MASK)

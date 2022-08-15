@@ -59,9 +59,10 @@ else
 fi
 
 # Configure device-specific settings
-case $XMOS_DEVICE in 
+case $XMOS_DEVICE in
   xvf3510-ua|xvf3610-ua|xvf3615-ua)
-    UA_MODE=y
+    USB_MODE=y
+    I2S_MODE=slave
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_ua
     ;;
 
@@ -126,7 +127,7 @@ fi
 echo  "Installing necessary packages for dev kit"
 packages=$PACKAGES_TO_INSTALL
 # Add packages for UA mode
-if [[ -n "$UA_MODE" ]]; then
+if [[ -n "$USB_MODE" ]]; then
   packages="$packages $PACKAGES_TO_INSTALL_ONLY_FOR_UA"
 fi
 for package in $packages; do
@@ -183,7 +184,7 @@ fi
 popd > /dev/null
 
 # Copy the udev rules files if device is UA
-if [[ -n "$UA_MODE" ]]; then
+if [[ -n "$USB_MODE" ]]; then
   echo "Add UDEV rules for XMOS devices"
   sudo cp $RPI_SETUP_DIR/resources/99-xmos.rules /etc/udev/rules.d/
 fi
@@ -208,7 +209,7 @@ sudo /etc/init.d/alsa-utils restart
 
 if [[ -n "$I2S_MODE" ]]; then
   # Create the script to run after each reboot and make the soundcard available
-  i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_driver.sh
+  i2s_driver_script=$RPI_SETUP_DIR/resources/load_i2s_${I2S_MODE}_driver.sh
   rm -f $i2s_driver_script
 
   # Sometimes with Buster on RPi3 the SYNC bit in the I2S_CS_A_REG register is not set before the drivers are loaded
@@ -256,27 +257,34 @@ if [[ -n "$DAC_SETUP" ]]; then
 fi
 
 # Regenerate crontab file with new commands
-rm -f $RPI_SETUP_DIR/resources/crontab
+crontab_file=$RPI_SETUP_DIR/resources/crontab
+if [ -n "$USB_MODE" ]; then
+    crontab_file="${crontab_file}_usb"
+elif [ -n "$I2S_MODE" ]; then
+    crontab_file="${crontab_file}_i2s_${I2S_MODE}"
+fi
+
+rm -f $crontab_file
 
 # Setup the crontab to restart I2S at reboot
 if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
   if [[ -n "$I2S_MODE" ]]; then
-    echo "@reboot sh $i2s_driver_script" >> $RPI_SETUP_DIR/resources/crontab
+    echo "@reboot sh $i2s_driver_script" >> $crontab_file
   fi
-
   if [[ -n "$DAC_SETUP" ]]; then
-    echo "@reboot sh $dac_and_clks_script" >> $RPI_SETUP_DIR/resources/crontab
+    echo "@reboot sh $dac_and_clks_script" >> $crontab_file
   fi
 popd > /dev/null
 fi
+
 # Setup the crontab to copy the .asoundrc file at reboot
 # Delay the action by 10 seconds to allow the host to boot up
 # This is needed to address the known issue in Raspian Buster:
 # https://forums.raspberrypi.com/viewtopic.php?t=295008
-echo "@reboot sleep 15 && cp $ASOUNDRC_TEMPLATE ~/.asoundrc" >> $RPI_SETUP_DIR/resources/crontab
+echo "@reboot sleep 15 && cp $ASOUNDRC_TEMPLATE ~/.asoundrc" >> $crontab_file
 
 # Update crontab
-crontab $RPI_SETUP_DIR/resources/crontab
+crontab $crontab_file
 
 echo "To enable all interfaces, this Raspberry Pi must be rebooted."
 
