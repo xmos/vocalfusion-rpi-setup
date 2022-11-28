@@ -2,7 +2,7 @@
 
 ## 5.4.0
 
-  * Fix and document MCLK phase issue found on rapberry pi 3b
+  * Fix and document MCLK phase issue found on raspberry pi 3b
 
 ## 5.3.0
 
