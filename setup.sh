@@ -225,6 +225,15 @@ if [[ -n "$I2S_MODE" ]]; then
   echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
   echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
   echo "aplay dummy > /dev/null 2>&1"                       >> $i2s_driver_script
+
+  if [[ "$I2S_MODE" = "master" ]]; then
+    echo "# Preconfigure i2s clocks to 48kHz"               >> $i2s_driver_script
+    # wait a bit as it doesn't work otherwise, this is probably caused
+    # by the same process that is deleting .asoundrc
+    echo "sleep 15"                                         >> $i2s_driver_script
+    echo "arecord -Dhw:sndrpisimplecar,0 -c2 -fS32_LE -r48000 -s1 /dev/null" >> $i2s_driver_script
+    echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk" >> $i2s_driver_script
+  fi
 fi
 
 if [[ -n "$DAC_SETUP" ]]; then
