@@ -104,3 +104,20 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
    Wait for the script to complete the installation. This can take several minutes.
 
 5. Reboot the Raspberry Pi.
+
+## Important note on clocks
+
+The I2S/PCM driver that is provided with rasbian does not support an MCLK output. However the 
+driver does have full ability to set the BCLK and LRCLK correctly for a given sample rate. As 
+the driver does not know about the MCLK it is likely to choose dividers for the clocks generators
+which are not phase locked to the MCLK. The script in this repo gets around this problem by 
+configuring the i2s driver to a certain frequency and then overriding the clock registers to force
+a phase locked frequency.
+
+This will work until a different sample rate is chosen by an application, then the I2S driver will
+write it's own value to the clocks and the MCLK will no longer be phase locked. To solve this problem
+the following steps must be taken before connecting an XVF device with a different sample rate:
+
+1. Take a short recording at the new sample rate: `arecord -c2 -fS32_LE -r{sample_rate} -s1 -Dhw:sndrpisimplecar`
+2. For 48kHz `./resources/clk_dac_setup/setup_blk`, for 16kHz `./resources/clk_dac_setup/setup_blk`
+

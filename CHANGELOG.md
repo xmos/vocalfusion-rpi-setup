@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.4.0
+
+  * Fix and document MCLK phase issue found on raspberry pi 3b
+
 ## 5.3.0
 
   * Fix setup_dac.py script for XVF3615
