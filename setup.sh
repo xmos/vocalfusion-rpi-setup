@@ -6,7 +6,7 @@ I2S_MODE=
 XMOS_DEVICE=
 INSTALL_ATTEMPT_NUM_MAX=10
 # Valid values for XMOS device
-VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510-int xvf3510-ua xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua"
+VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510-int xvf3510-ua xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua xvf3800-intdev xvf3800-inthost"
 
 PACKAGES_TO_INSTALL="python3-matplotlib python3-numpy libatlas-base-dev audacity libreadline-dev libncurses-dev"
 PACKAGES_TO_INSTALL_ONLY_FOR_UA="libusb-1.0-0-dev libevdev-dev libudev-dev"
@@ -65,10 +65,9 @@ case $XMOS_DEVICE in
     I2S_MODE=slave
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_ua
     ;;
-
   xvf3510-int|xvf3610-int|xvf3615-int)
     I2S_MODE=master
-    DAC_SETUP=y
+    IO_EXP_AND_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf_xvf3510_int
     ;;
   xvf3500)
@@ -81,12 +80,23 @@ case $XMOS_DEVICE in
     ;;
   xvf3600-slave)
     I2S_MODE=master
-    DAC_SETUP=y
+    IO_EXP_AND_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
   xvf3600-master)
     I2S_MODE=slave
-    DAC_SETUP=y
+    IO_EXP_AND_DAC_SETUP=y
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
+    ;;
+  # Note DAC is not setup for XVF3800 - the setup script takes an arg which will conditionally do this
+  xvf3800-intdev)
+    I2S_MODE=master
+    IO_EXP_AND_DAC_SETUP=y
+    ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
+    ;;
+  xvf3800-inthost)
+    I2S_MODE=slave
+    IO_EXP_AND_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
   *)
@@ -236,7 +246,7 @@ if [[ -n "$I2S_MODE" ]]; then
   fi
 fi
 
-if [[ -n "$DAC_SETUP" ]]; then
+if [[ -n "$IO_EXP_AND_DAC_SETUP" ]]; then
   pushd $RPI_SETUP_DIR/resources/clk_dac_setup/ > /dev/null
   make
   popd > /dev/null
@@ -248,11 +258,11 @@ if [[ -n "$DAC_SETUP" ]]; then
     echo "sudo $RPI_SETUP_DIR/resources/clk_dac_setup/setup_bclk"                  >> $dac_and_clks_script
   fi
   # Note that only the substring xvfXXXX from $XMOS_DEVICE is used in the lines below
-  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_dac.py $(echo $XMOS_DEVICE | cut -c1-7)" >> $dac_and_clks_script
+  echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/setup_io_exp_and_dac.py $(echo $XMOS_DEVICE | cut -c1-7)" >> $dac_and_clks_script
   echo "python $RPI_SETUP_DIR/resources/clk_dac_setup/reset_xvf.py $(echo $XMOS_DEVICE | cut -c1-7)" >> $dac_and_clks_script
 fi
 
-if [[ -n "$DAC_SETUP" ]]; then
+if [[ -n "$IO_EXP_AND_DAC_SETUP" ]]; then
   audacity_script=$RPI_SETUP_DIR/resources/run_audacity.sh
   rm -f $audacity_script
   echo "#!/usr/bin/env bash" >> $audacity_script
@@ -276,11 +286,11 @@ fi
 rm -f $crontab_file
 
 # Setup the crontab to restart I2S at reboot
-if [ -n "$I2S_MODE" ] || [ -n "$DAC_SETUP" ]; then
+if [ -n "$I2S_MODE" ] || [ -n "$IO_EXP_AND_DAC_SETUP" ]; then
   if [[ -n "$I2S_MODE" ]]; then
     echo "@reboot sh $i2s_driver_script" >> $crontab_file
   fi
-  if [[ -n "$DAC_SETUP" ]]; then
+  if [[ -n "$IO_EXP_AND_DAC_SETUP" ]]; then
     echo "@reboot sh $dac_and_clks_script" >> $crontab_file
   fi
 popd > /dev/null
