@@ -1,44 +1,42 @@
 #!usr/bin/python
-# Copyright (c) 2018-2022, XMOS Ltd, All rights reserved
+# Copyright (c) 2018-2023, XMOS Ltd, All rights reserved
 
-#run this on the raspberry pi to program the DAC
+# run this on the raspberry pi to setup the IO expander and program the DAC (DAC setup for non-xvf3800 only)
 
 import argparse
 import smbus
 import time
 
-def setup_dac(args):
+def setup_io_expander(bus, args):
     """
-    Function to configure DAC of XVF boards
+    Function to setup the I2C IO expander of XVF boards
 
     Args:
+        bus - I2C access object
         args - command line arguments
 
     Returns:
         None
     """
-
-    samFreq = 48000
-    bus = smbus.SMBus(1)
-
+    # I2C expander bus address for XVF36XX and XVF3800 with PCAL6408A expander device
     I2C_EXPANDER_ADDRESS = 0x20
 
+    # I2C expander register addresses 
+    I2C_EXPANDER_OUTPUT_PORT_REG = 0x01
+    I2C_EXPANDER_CONFIGURATION_REG = 0x03
+    I2C_EXPANDER_INTERRUPT_MASK_REG = 0x45
+
+    # I2C expander pin mapping
+    XVF_RST_N_PIN = 0
+    INT_N_PIN = 1
+    DAC_RST_N_PIN = 2
+    BOOT_SEL_PIN = 3
+    MCLK_OE_PIN = 4
+    SPI_OE_PIN = 5
+    I2S_OE_PIN = 6
+    MUTE_PIN = 7
+
     if "xvf36" in args.hw:
-
-        # I2C expander register addresses
-        I2C_EXPANDER_OUTPUT_PORT_REG = 0x01
-        I2C_EXPANDER_CONFIGURATION_REG = 0x03
-        I2C_EXPANDER_INTERRUPT_MASK_REG = 0x45
-
-        # I2C expander pins
-        XVF_RST_N_PIN = 0
-        INT_N_PIN = 1
-        DAC_RST_N_PIN = 2
-        BOOT_SEL_PIN = 3
-        MCLK_OE_PIN = 4
-        SPI_OE_PIN = 5
-        I2S_OE_PIN = 6
-        MUTE_PIN = 7
 
         # Set pin values
         # set DAC_RST_N to 0 and enable level shifters on the I2C expander
@@ -79,6 +77,36 @@ def setup_dac(args):
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_OUTPUT_PORT_REG, OUTPUT_PORT_MASK | (1<<DAC_RST_N_PIN))
         time.sleep(0.1)
 
+    elif "xvf38" in args.hw:
+        # Set pin values to 1. Note no DAC reset as this is done by the firmware
+        # Note pre-load XVF_RST and BOOT_SEL to 1 and preload I2S/MCLK/SPI driving signal from host to xvf
+        OUTPUT_PORT_MASK= (1<<XVF_RST_N_PIN) | \
+                          (1<<BOOT_SEL_PIN)  | \
+                          (1<<MCLK_OE_PIN)   | \
+                          (1<<SPI_OE_PIN)    | \
+                          (1<<I2S_OE_PIN)
+
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_OUTPUT_PORT_REG, OUTPUT_PORT_MASK)
+        time.sleep(0.1)
+
+        # Configure pin directions. Setting to 1 means input, or Hi-Z. So anything not mentioned
+        # below will be an output. Note reset, int and boot_sel NOT driven because they are set high in the mask
+        # use DAC_RST_N and level shift OE as driven outputs
+        CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
+                             (1<<INT_N_PIN)     | \
+                             (1<<DAC_RST_N_PIN) | \
+                             (1<<BOOT_SEL_PIN)
+                             #I2S, MCLK and SPI all enabled so we can drive from host to xvf3800     
+
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_CONFIGURATION_REG, CONFIGURATION_MASK)
+        time.sleep(0.1)
+
+        # Enable the interrupt on INT_N pin
+        # Interrupts are enabled by setting corresponding mask bits to logic 0
+        INTERRUPT_MASK = 0xFF & ~(1<<INT_N_PIN)
+        bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INTERRUPT_MASK_REG, INTERRUPT_MASK)
+
+
     else:
         # set DAC_RST_N to 0 on the I2C expander (address 0x20)
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, 6, 0xff)
@@ -86,11 +114,24 @@ def setup_dac(args):
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, 6, 0x7f)
         time.sleep(0.1)
 
+
+
+def setup_dac(bus):
+    """
+    Function to configure DAC of XVF boards
+
+    Args:
+        bus - I2C access object
+
+    Returns:
+        None
+    """
+
     DEVICE_ADDRESS = 0x18
     # TLV320DAC3101 Register Addresses
     # Page 0
-    DAC3101_PAGE_CTRL    = 0x00 # Register 0 - Page Control
-    DAC3101_SW_RST        = 0x01 # Register 1 - Software Reset
+    DAC3101_PAGE_CTRL    =  0x00 # Register 0 - Page Control
+    DAC3101_SW_RST       =  0x01 # Register 1 - Software Reset
     DAC3101_CLK_GEN_MUX  =  0x04 # Register 4 - Clock-Gen Muxing
     DAC3101_PLL_P_R      =  0x05 # Register 5 - PLL P and R Values
     DAC3101_PLL_J        =  0x06 # Register 6 - PLL J Value
@@ -250,4 +291,9 @@ def setup_dac(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("hw", help="Hardware type")
-    setup_dac(parser.parse_args())
+    args = parser.parse_args()
+    bus = smbus.SMBus(1)
+
+    setup_io_expander(bus, args)
+    if "xvf36" in args.hw:
+        setup_dac(bus)

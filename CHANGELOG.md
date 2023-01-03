@@ -1,5 +1,12 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.4.0
+
+  * Add support for XVF3800
+  * rename setup_dac.py to setup_io_exp_and_dac.py
+  * Fixed documentation to state use of 12.288MHz instead of 24.576MHz mclk
+  * Fix and document MCLK phase issue found on raspberry pi 3b
+
 ## 5.3.0
 
   * Fix setup_dac.py script for XVF3615
