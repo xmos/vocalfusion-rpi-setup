@@ -6,7 +6,7 @@ I2S_MODE=
 XMOS_DEVICE=
 INSTALL_ATTEMPT_NUM_MAX=10
 # Valid values for XMOS device
-VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510-int xvf3510-ua xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua xvf3800-intdev xvf3800-inthost xvf3800-ua""
+VALID_XMOS_DEVICES="xvf3100 xvf3500 xvf3510-int xvf3510-ua xvf3600-slave xvf3600-master xvf3610-int xvf3610-ua xvf3615-int xvf3615-ua xvf3800-intdev xvf3800-inthost"
 
 PACKAGES_TO_INSTALL="python3-matplotlib python3-numpy libatlas-base-dev audacity libreadline-dev libncurses-dev"
 PACKAGES_TO_INSTALL_ONLY_FOR_UA="libusb-1.0-0-dev libevdev-dev libudev-dev"
@@ -87,13 +87,14 @@ case $XMOS_DEVICE in
     I2S_MODE=slave
     IO_EXP_AND_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
+    ;;
   # Note DAC is not setup for XVF3800 - the setup script takes an arg which will conditionally do this
   xvf3800-intdev)
     I2S_MODE=master
     IO_EXP_AND_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
     ;;
-  xvf3800-inthost|xvf3800-ua)
+  xvf3800-inthost)
     I2S_MODE=slave
     IO_EXP_AND_DAC_SETUP=y
     ASOUNDRC_TEMPLATE=$RPI_SETUP_DIR/resources/asoundrc_vf
