@@ -16,7 +16,7 @@ This setup will perform the following operations:
 
 For XVF3510-INT devices these actions will be done as well:
 
-- configure MCLK at 24576kHz from pin 7 (BCM 4)
+- configure MCLK at 12288kHz from pin 7 (BCM 4)
 - configure I2S BCLK at 3072kHz from pin 12 (BCM18)
 - update the alias for Audacity
 - update the asoundrc file to support I2S devices
@@ -31,6 +31,14 @@ For XVF361x-INT devices these actions will be done as well:
 - update the asoundrc file to support I2S devices
 - add a cron job to reset the device at boot up
 - add a cron job to configure the DAC at boot up
+
+For XVF3800(ALL) devices these actions will be done as well:
+
+- configure MCLK at 12288kHz from pin 7 (BCM 4)
+- configure I2S BCLK at 3072kHz from pin 12 (BCM18)
+- update the alias for Audacity
+- update the asoundrc file to support I2S devices
+- add a cron job to reset the device at boot up
 
 For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
@@ -101,6 +109,18 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
    ```./setup.sh xvf3615-int```
 
+   For XVF3800-INTDEV devices, run the installation script as follows:
+
+   ```./setup.sh xvf3800-intdev```
+
+   For XVF3800-INTHOST devices, run the installation script as follows:
+
+   ```./setup.sh xvf3800-inthost```
+
+   For XVF3800-UA devices, run the installation script as follows:
+
+   ```./setup.sh xvf3800-ua```
+
    Wait for the script to complete the installation. This can take several minutes.
 
 5. Reboot the Raspberry Pi.
@@ -119,5 +139,5 @@ write it's own value to the clocks and the MCLK will no longer be phase locked. 
 the following steps must be taken before connecting an XVF device with a different sample rate:
 
 1. Take a short recording at the new sample rate: `arecord -c2 -fS32_LE -r{sample_rate} -s1 -Dhw:sndrpisimplecar`
-2. For 48kHz `./resources/clk_dac_setup/setup_blk`, for 16kHz `./resources/clk_dac_setup/setup_blk`
+2. For 48kHz `./resources/clk_dac_setup/setup_blk`, for 16kHz `./resources/clk_dac_setup/setup_blk 16000`
 

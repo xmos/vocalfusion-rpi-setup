@@ -11,7 +11,7 @@
 */
 
 /*
-   Set the general purpose clk GPCLK0 (gpio4) to 24.576 MHz,
+   Set the general purpose clk GPCLK0 (gpio4) to 12.288 MHz,
    and PCM CLK to 3.072 MHz, using PLLD as source.
 */
 

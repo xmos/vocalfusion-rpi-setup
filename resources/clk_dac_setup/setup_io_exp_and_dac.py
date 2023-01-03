@@ -130,8 +130,8 @@ def setup_dac(bus):
     DEVICE_ADDRESS = 0x18
     # TLV320DAC3101 Register Addresses
     # Page 0
-    DAC3101_PAGE_CTRL    = 0x00 # Register 0 - Page Control
-    DAC3101_SW_RST        = 0x01 # Register 1 - Software Reset
+    DAC3101_PAGE_CTRL    =  0x00 # Register 0 - Page Control
+    DAC3101_SW_RST       =  0x01 # Register 1 - Software Reset
     DAC3101_CLK_GEN_MUX  =  0x04 # Register 4 - Clock-Gen Muxing
     DAC3101_PLL_P_R      =  0x05 # Register 5 - PLL P and R Values
     DAC3101_PLL_J        =  0x06 # Register 6 - PLL J Value
