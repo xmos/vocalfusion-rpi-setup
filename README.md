@@ -39,6 +39,7 @@ For XVF3800(ALL) devices these actions will be done as well:
 - update the alias for Audacity
 - update the asoundrc file to support I2S devices
 - add a cron job to reset the device at boot up
+- add a cron job to configure the IO expander at boot up
 
 For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
