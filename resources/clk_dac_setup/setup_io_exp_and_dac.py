@@ -1,5 +1,5 @@
 #!usr/bin/python
-# Copyright (c) 2018-2022, XMOS Ltd, All rights reserved
+# Copyright (c) 2018-2023, XMOS Ltd, All rights reserved
 
 #run this on the raspberry pi to program setup the IO expander and program the DAC (non xvf3800)
 

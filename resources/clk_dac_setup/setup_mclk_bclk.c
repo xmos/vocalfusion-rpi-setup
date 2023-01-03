@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2023, XMOS Ltd, All rights reserved
 
 /*
     Trimmed down version of the minimal_clk.c file present

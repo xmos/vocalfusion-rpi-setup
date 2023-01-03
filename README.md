@@ -17,7 +17,7 @@ This setup will perform the following operations:
 For XVF3510-INT devices these actions will be done as well:
 
 - configure MCLK at 12288kHz from pin 7 (BCM 4)
-- configure I2S BCLK at 3072kHz from pin 12 (BCM18)
+- configure I2S BCLK at 3072kHz from pin 12 (BCM 18)
 - update the alias for Audacity
 - update the asoundrc file to support I2S devices
 - add a cron job to reset the device at boot up
@@ -26,7 +26,7 @@ For XVF3510-INT devices these actions will be done as well:
 For XVF361x-INT devices these actions will be done as well:
 
 - configure MCLK at 12288kHz from pin 7 (BCM 4)
-- configure I2S BCLK at 3072kHz from pin 12 (BCM18)
+- configure I2S BCLK at 3072kHz from pin 12 (BCM 18)
 - update the alias for Audacity
 - update the asoundrc file to support I2S devices
 - add a cron job to reset the device at boot up
@@ -35,7 +35,7 @@ For XVF361x-INT devices these actions will be done as well:
 For XVF3800(ALL) devices these actions will be done as well:
 
 - configure MCLK at 12288kHz from pin 7 (BCM 4)
-- configure I2S BCLK at 3072kHz from pin 12 (BCM18)
+- configure I2S BCLK at 3072kHz from pin 12 (BCM 18)
 - update the alias for Audacity
 - update the asoundrc file to support I2S devices
 - add a cron job to reset the device at boot up
