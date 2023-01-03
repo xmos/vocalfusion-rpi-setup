@@ -117,9 +117,6 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
    ```./setup.sh xvf3800-inthost```
 
-   For XVF3800-UA devices, run the installation script as follows:
-
-   ```./setup.sh xvf3800-ua```
 
    Wait for the script to complete the installation. This can take several minutes.
 
