@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.5.0
+
+  * Add tool for setting arbitrary I2S clock
+
 ## 5.4.0
 
   * Add support for XVF3800
