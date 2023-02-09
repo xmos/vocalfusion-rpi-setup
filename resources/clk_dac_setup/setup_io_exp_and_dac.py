@@ -77,7 +77,7 @@ def setup_io_expander(bus, args):
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_OUTPUT_PORT_REG, OUTPUT_PORT_MASK | (1<<DAC_RST_N_PIN))
         time.sleep(0.1)
 
-    elif "xvf38" in args.hw:
+ elif "xvf38" in args.hw:
         # Set pin values to 1. Note no DAC reset as this is done by the firmware
         # Note pre-load XVF_RST and BOOT_SEL to 1 and preload I2S/MCLK/SPI driving signal from host to xvf
         OUTPUT_PORT_MASK= (1<<XVF_RST_N_PIN) | \
@@ -90,14 +90,20 @@ def setup_io_expander(bus, args):
         time.sleep(0.1)
 
         # Configure pin directions. Setting to 1 means input, or Hi-Z. So anything not mentioned
-        # below will be an output. Note reset, int and boot_sel NOT driven because they are set high in the mask
+        # below will be an output. Note reset, int and boot_sel and mclk NOT driven because they are set high in the mask
         # use DAC_RST_N and level shift OE as driven outputs
         CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
                              (1<<INT_N_PIN)     | \
                              (1<<DAC_RST_N_PIN) | \
+                             (1<<MCLK_OE_PIN)   | \
                              (1<<BOOT_SEL_PIN)
                              #I2S, MCLK and SPI all enabled so we can drive from host to xvf3800     
 
+        # Enable the MCLK level shifter so we can route MCLK from Pi to xvf3800. Clear MCLK_OE so it drives
+        # from the Pi to the xvf3800. Note only used in extmclk configurations
+        if "extmclk" in args.hw:
+            CONFIGURATION_MASK &= ~(1<<MCLK_OE_PIN)
+    
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_CONFIGURATION_REG, CONFIGURATION_MASK)
         time.sleep(0.1)
 
@@ -105,6 +111,7 @@ def setup_io_expander(bus, args):
         # Interrupts are enabled by setting corresponding mask bits to logic 0
         INTERRUPT_MASK = 0xFF & ~(1<<INT_N_PIN)
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_INTERRUPT_MASK_REG, INTERRUPT_MASK)
+
 
 
     else:
