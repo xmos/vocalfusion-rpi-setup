@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.6.0
+
+  * No Pi->XVF3800 MCLK drive by default. Use xvf3800-int-dev-extmclk to enable this
+
 ## 5.5.0
 
   * Add tool for setting arbitrary I2S clock
