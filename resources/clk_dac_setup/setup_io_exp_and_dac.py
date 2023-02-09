@@ -77,7 +77,7 @@ def setup_io_expander(bus, args):
         bus.write_byte_data(I2C_EXPANDER_ADDRESS, I2C_EXPANDER_OUTPUT_PORT_REG, OUTPUT_PORT_MASK | (1<<DAC_RST_N_PIN))
         time.sleep(0.1)
 
- elif "xvf38" in args.hw:
+    elif "xvf38" in args.hw:
         # Set pin values to 1. Note no DAC reset as this is done by the firmware
         # Note pre-load XVF_RST and BOOT_SEL to 1 and preload I2S/MCLK/SPI driving signal from host to xvf
         OUTPUT_PORT_MASK= (1<<XVF_RST_N_PIN) | \
