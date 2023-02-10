@@ -14,10 +14,10 @@ This setup will perform the following operations:
 - update the asoundrc file to support I2S devices
 - add a cron job to load the I2S drivers at boot up
 
-For XVF3510 devices these actions will be done as well:
+For XVF3510-INT devices these actions will be done as well:
 
-- configure MCLK at 24576kHz from pin 7 (BCM 4)
-- configure I2S BCLK at 3072kHz from pin 12 (BCM18)
+- configure MCLK at 12288kHz from pin 7 (BCM 4)
+- configure I2S BCLK at 3072kHz from pin 12 (BCM 18)
 - update the alias for Audacity
 - update the asoundrc file to support I2S devices
 - add a cron job to reset the device at boot up
@@ -26,13 +26,25 @@ For XVF3510 devices these actions will be done as well:
 For XVF361x-INT devices these actions will be done as well:
 
 - configure MCLK at 12288kHz from pin 7 (BCM 4)
-- configure I2S BCLK at 3072kHz from pin 12 (BCM18)
+- configure I2S BCLK at 3072kHz from pin 12 (BCM 18)
 - update the alias for Audacity
 - update the asoundrc file to support I2S devices
 - add a cron job to reset the device at boot up
 - add a cron job to configure the DAC at boot up
 
-For XVF361x-UA devices these actions will be done as well:
+For XVF3800(DEFAULT) devices these actions will be done as well:
+
+- configure I2S BCLK at 3072kHz from pin 12 (BCM 18)
+- update the alias for Audacity
+- update the asoundrc file to support I2S devices
+- add a cron job to reset the device at boot up
+- add a cron job to configure the IO expander at boot up
+
+For XVF3800-extmclk devices these actions will be done as well:
+- configure MCLK at 12288kHz from pin 7 (BCM 4) and drive to XVF3800
+
+
+For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
 - update the asoundrc file to support USB devices
 - update udev rules so that root privileges are not needed to access USB control interface
@@ -101,6 +113,35 @@ For XVF361x-UA devices these actions will be done as well:
 
    ```./setup.sh xvf3615-int```
 
+   For XVF3800-INTDEV devices, run the installation script as follows:
+
+   ```./setup.sh xvf3800-intdev```
+
+   For XVF3800-INTHOST devices, run the installation script as follows:
+
+   ```./setup.sh xvf3800-inthost```
+
+  For XVF3800-INTDEV-EXTMCLK devices, run the installation script as follows:
+
+   ```./setup.sh xvf3800-intdev-extmclk```
+
    Wait for the script to complete the installation. This can take several minutes.
 
 5. Reboot the Raspberry Pi.
+
+## Important note on clocks
+
+The I2S/PCM driver that is provided with raspbian does not support an MCLK output. However the 
+driver does have full ability to set the BCLK and LRCLK correctly for a given sample rate. As 
+the driver does not know about the MCLK it is likely to choose dividers for the clocks generators
+which are not phase locked to the MCLK. The script in this repo gets around this problem by 
+configuring the i2s driver to a certain frequency and then overriding the clock registers to force
+a phase locked frequency.
+
+This will work until a different sample rate is chosen by an application, then the I2S driver will
+write it's own value to the clocks and the MCLK will no longer be phase locked. To solve this problem
+the following steps must be taken before connecting an XVF device with a different sample rate:
+
+1. Take a short recording at the new sample rate: `arecord -c2 -fS32_LE -r{sample_rate} -s1 -Dhw:sndrpisimplecar`
+2. For 48kHz `./resources/clk_dac_setup/setup_blk`, for 16kHz `./resources/clk_dac_setup/setup_blk 16000`
+

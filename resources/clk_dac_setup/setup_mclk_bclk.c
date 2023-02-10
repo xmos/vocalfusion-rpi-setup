@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2023, XMOS Ltd, All rights reserved
 
 /*
     Trimmed down version of the minimal_clk.c file present
@@ -11,7 +11,7 @@
 */
 
 /*
-   Set the general purpose clk GPCLK0 (gpio4) to 24.576 MHz,
+   Set the general purpose clk GPCLK0 (gpio4) to 12.288 MHz,
    and PCM CLK to 3.072 MHz, using PLLD as source.
 */
 
@@ -99,6 +99,18 @@ void gpioSetMode(unsigned gpio, unsigned mode)
     gpioReg[reg] = (gpioReg[reg] & ~(7<<shift)) | (mode<<shift);
 }
 
+struct clk_reg_t {
+    int i;
+    int f;
+};
+
+struct clk_reg_t calc_register_values(double input_khz, double output_khz) {
+    int i = input_khz/output_khz;
+    return (struct clk_reg_t) {
+        .i = i,
+        .f = ((input_khz/output_khz) - i) * 4096
+    };
+}
 
 unsigned getGpioHardwareRevision(void)
 {
@@ -279,6 +291,31 @@ int main(int argc, char *argv[])
     printf("MCLK at %.3fkHz: using %s (I=%-4d F=%-4d MASH=%d)\n",
             (float)(source_clk_kHz / (clk_i + (float) clk_f/4096)),
             clocks[clk_source], clk_i, clk_f, clk_mash);
+#elif defined(ARBITRARY_LRCLK)
+    if(argc <= 1) {
+        return 1;
+    }
+
+    double desired = atof(argv[1]);
+    if(desired < 8000) {
+        printf("bad arg, expected valid clock rate in hz");
+        return 1;
+    }
+    printf("requested lrclk %f\n", desired);
+
+    int clk_index = 2;
+    int clk_source = 0;
+    int clk_mash = 1;
+    int clk_enable = 1;
+    double bclk_per_lrclk = 64;
+    struct clk_reg_t c = calc_register_values(source_clk_kHz, (desired*bclk_per_lrclk)/1000);
+    int clk_i = c.i;
+    int clk_f = c.f;
+
+    printf("BCLK at %.3fkHz: using %s (I=%-4d F=%-4d MASH=%d)\n",
+            (float)(source_clk_kHz / (clk_i + (float) clk_f/4096)),
+            clocks[clk_source], clk_i, clk_f, clk_mash);
+
 #else
     int i2s_16000 = 0;
     if (argc > 1){

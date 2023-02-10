@@ -1,5 +1,40 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.6.0
+
+  * No Pi->XVF3800 MCLK drive by default. Use xvf3800-int-dev-extmclk to enable this
+
+## 5.5.0
+
+  * Add tool for setting arbitrary I2S clock
+
+## 5.4.0
+
+  * Add support for XVF3800
+  * rename setup_dac.py to setup_io_exp_and_dac.py
+  * Fixed documentation to state use of 12.288MHz instead of 24.576MHz mclk
+  * Fix and document MCLK phase issue found on raspberry pi 3b
+
+## 5.3.0
+
+  * Fix setup_dac.py script for XVF3615
+  * Build I2S slave drivers for UA XVF3610 setup
+  * Save crontab settings in 'resources' directory
+  * Use different names for I2S slave and master scripts
+
+## 5.2.0
+
+  * Added copying of asoundrc file at bootup
+  * Fixed checks for installation of debian packages
+  * Updated equality operators
+
+## 5.1.0
+
+  * Added support for xvf3510-ua
+  * Renamed xvf3510 device as xvf3510-int
+  * Fix bug in parsing of device names
+  * Install one Debian package at the time
+
 ## 5.0.0
 
   * Added support for xvf3610-ua and xvf3615-ua
