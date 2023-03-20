@@ -50,22 +50,9 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
 1. First, obtain the latest version of the Raspberry Pi operating system, which can be installed with the Raspberry Pi Imager, available from [the Raspberry Pi website](https://www.raspberrypi.com/) at time of writing.
 
-   We cannot use the latest as updates to linux kernel v5 have broken the I2S sub-system.
-
-   Then, install the Raspberry Pi Imager on a host computer. Raspberry Pi Imager is available here:
-
-   https://www.raspberrypi.org/software/
-
-   Run the Raspberry Pi Imager, and select the 'CHOOSE OS' button. Scroll to the bottom of the displayed list, and select "Use custom".
-   Then select the file downloaded above (2020-02-13-raspbian-buster.zip) and select "Open". The archive file does not have to be unzipped, the imager software will do that.
-
-   Select the CHOOSE SD CARD button to which to download the image, and then select the "WRITE" button.
-
-   When prompted, remove the written SD card and insert it into the Raspberry Pi.
-
 2. Connect up the keyboard, mouse, speakers and display to the Raspberry Pi and power up the system. Refer to the **Getting Started Guide** for you platform.
 
-   Follow the prompt to update the software on the system. Set up the locale, and setup a network connect.
+   At the first boot-up, follow the prompt to configure your preferred settings and update the software on the system  The default settings are working as well.
 
 
 3. On the Raspberry Pi, clone the Github repository https://github.com/xmos/vocalfusion-rpi-setup:
