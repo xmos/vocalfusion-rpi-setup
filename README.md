@@ -2,9 +2,6 @@
 
 This repository provides a simple-to-use automated script to configure the Raspberry Pi to use **xCORE VocalFusion** for audio.
 
-**Note:** This repository is designed for use within the following **xCORE VocalFusion** repository:
-- xCORE VocalFusion Kit for AVS: https://github.com/xmos/vocalfusion-avs-setup
-
 This setup will perform the following operations:
 
 - enable the I2S, I2C and SPI interfaces
@@ -51,9 +48,7 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
 ## Setup
 
-1. First, obtain the required version of the Raspberry Pi operating system, which is available here:
-
-   https://downloads.raspberrypi.org/raspbian/images/raspbian-2020-02-14/2020-02-13-raspbian-buster.zip
+1. First, obtain the latest version of the Raspberry Pi operating system, which can be installed with the Raspberry Pi Imager, available from [the Raspberry Pi website](https://www.raspberrypi.com/) at time of writing.
 
    We cannot use the latest as updates to linux kernel v5 have broken the I2S sub-system.
 
@@ -70,7 +65,7 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
 2. Connect up the keyboard, mouse, speakers and display to the Raspberry Pi and power up the system. Refer to the **Getting Started Guide** for you platform.
 
-   **DO NOT** follow the prompt to update the software on the system. Set up the locale, and setup a network connect, but **DO NOT** update the software on the Raspberry Pi. This will update the kernel, and then the audio sub-system will not work.
+   Follow the prompt to update the software on the system. Set up the locale, and setup a network connect.
 
 
 3. On the Raspberry Pi, clone the Github repository https://github.com/xmos/vocalfusion-rpi-setup:
