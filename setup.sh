@@ -105,6 +105,10 @@ case $XMOS_DEVICE in
   ;;
 esac
 
+# Update the software packages
+sudo apt update
+sudo apt upgrade
+
 # Disable the built-in audio output so there is only one audio
 # device in the system
 sudo sed -i -e 's/^dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
