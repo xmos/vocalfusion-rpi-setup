@@ -2,6 +2,7 @@
 
 ## 5.7.0
 
+  * Force update of all Debian packages before installation starts
   * Update steps for Raspberry Pi installation in README file
 
 ## 5.6.0
