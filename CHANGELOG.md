@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.7.0
+
+  * Update steps for Raspberry Pi installation in README file
+
 ## 5.6.0
 
   * No Pi->XVF3800 MCLK drive by default. Use xvf3800-int-dev-extmclk to enable this
