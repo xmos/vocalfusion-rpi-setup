@@ -65,9 +65,9 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
    **DO NOT** follow the prompt to "Update Software" on the system. Set up the locale, username, password and a network connection, but **DO NOT** update the software on the Raspberry Pi. This will update the kernel, and then the audio sub-system will not work.
 
-**_NOTE:_** Headless installation forces an upgrade of the software, so it can be used for this setup.
+**_NOTE:_** Headless installation forces an upgrade of the software, so it cannot be used for this setup.
 
-**_NOTE:_** Host applications and scripts used be the XMOS products support only 32-bit Raspbian systems.
+**_NOTE:_** Host applications and scripts used by the XMOS products support only 32-bit Raspbian systems.
 
 3. On the Raspberry Pi, clone the Github repository below:
 
