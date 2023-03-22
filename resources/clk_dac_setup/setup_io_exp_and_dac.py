@@ -97,7 +97,7 @@ def setup_io_expander(bus, args):
                              (1<<DAC_RST_N_PIN) | \
                              (1<<MCLK_OE_PIN)   | \
                              (1<<BOOT_SEL_PIN)
-                             #I2S, MCLK and SPI all enabled so we can drive from host to xvf3800     
+                             #I2S and SPI enabled so we can drive from host to xvf3800     
 
         # Enable the MCLK level shifter so we can route MCLK from Pi to xvf3800. Clear MCLK_OE so it drives
         # from the Pi to the xvf3800. Note only used in extmclk configurations
