@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.7.0
+
+  * Update Raspbian image to Bullseye (2023-02-21-raspios-bullseye-armhf)
+
 ## 5.6.0
 
   * No Pi->XVF3800 MCLK drive by default. Use xvf3800-int-dev-extmclk to enable this
