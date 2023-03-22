@@ -48,15 +48,11 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
 ## Setup
 
-1. First, obtain the required version of the Raspberry Pi operating system, which is available here:
-
-   https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2023-02-22/2023-02-21-raspios-bullseye-armhf.img.xz
+1. First, obtain the required version of the Raspberry Pi operating system, which is available [here](https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2023-02-22/2023-02-21-raspios-bullseye-armhf.img.xz)
 
    We cannot use the latest as updates to Linux kernel v5 have broken the I2S sub-system.
 
-   Then, install the Raspberry Pi Imager on a host computer. Raspberry Pi Imager is available here:
-
-   https://www.raspberrypi.org/software/
+   Then, install the Raspberry Pi Imager on a host computer. Raspberry Pi Imager is available [here](https://www.raspberrypi.org/software/)
 
    Run the Raspberry Pi Imager, and select the 'CHOOSE OS' button. Scroll to the bottom of the displayed list, and select "Use custom".
    Then select the file downloaded above (2023-02-21-raspios-bullseye-armhf.img.xz) and select "Open". The archive file does not have to be unzipped, the imager software will do that.
@@ -67,13 +63,13 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
 2. Connect up the keyboard, mouse, speakers and display to the Raspberry Pi and power up the system. Refer to the **Getting Started Guide** for you platform.
 
-   **DO NOT** follow the prompt to "Update Software" on the system. Set up the locale, username, password and a network connect, but **DO NOT** update the software on the Raspberry Pi. This will update the kernel, and then the audio sub-system will not work.
+   **DO NOT** follow the prompt to "Update Software" on the system. Set up the locale, username, password and a network connection, but **DO NOT** update the software on the Raspberry Pi. This will update the kernel, and then the audio sub-system will not work.
 
 **_NOTE:_** Headless installation forces an upgrade of the software, so it can be used for this setup.
 
-**_NOTE:_** Host applications and scripts used be the XMOS products support only 32-bit systems.
+**_NOTE:_** Host applications and scripts used be the XMOS products support only 32-bit Raspbian systems.
 
-3. On the Raspberry Pi, clone the Github repository https://github.com/xmos/vocalfusion-rpi-setup:
+3. On the Raspberry Pi, clone the Github repository below:
 
    ```git clone https://github.com/xmos/vocalfusion-rpi-setup```
 
