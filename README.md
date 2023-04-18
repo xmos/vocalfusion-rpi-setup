@@ -74,11 +74,18 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
    and wait for the Raspberry Pi to reboot.
 
-4. On the Raspberry Pi, clone the Github repository below:
+4. Update the Raspberry Pi package list and upgrade the packages to the latest version:
+
+    ```
+    sudo apt-get update
+    sudo apt-get upgrade
+    ```
+
+5. On the Raspberry Pi, clone the Github repository below:
 
    ```git clone https://github.com/xmos/vocalfusion-rpi-setup```
 
-5. For VocalFusion devices, run the installation script as follows:
+6. For VocalFusion devices, run the installation script as follows:
 
    ```./setup.sh xvf3100```
 
@@ -128,7 +135,7 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
    Wait for the script to complete the installation. This can take several minutes.
 
-6. Reboot the Raspberry Pi.
+7. Reboot the Raspberry Pi.
 
 ## Important note on clocks
 
