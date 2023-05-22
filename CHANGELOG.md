@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.8.0
+
+  * Update instructions to allow software update of Raspbian packages
+
 ## 5.7.0
 
   * Update Raspbian image to Bullseye (2023-02-21-raspios-bullseye-armhf)
