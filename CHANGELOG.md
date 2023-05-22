@@ -3,6 +3,7 @@
 ## 5.8.0
 
   * Update instructions to allow software update of Raspbian packages
+  * Increase crontab delay for copying .asoundrc from 15 to 20 seconds
 
 ## 5.7.0
 
