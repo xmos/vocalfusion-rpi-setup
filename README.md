@@ -79,6 +79,7 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
     ```
     sudo apt-get update
     sudo apt-get upgrade
+    sudo reboot
     ```
 
 5. On the Raspberry Pi, clone the Github repository below:
