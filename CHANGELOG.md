@@ -1,5 +1,10 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 5.8.0
+
+  * Update instructions to allow software update of Raspbian packages
+  * Increase crontab delay for copying .asoundrc from 15 to 20 seconds
+
 ## 5.7.0
 
   * Update Raspbian image to Bullseye (2023-02-21-raspios-bullseye-armhf)

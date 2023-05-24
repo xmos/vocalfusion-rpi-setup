@@ -50,8 +50,6 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
 1. First, obtain the required version of the Raspberry Pi operating system, which is available [here](https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2023-02-22/2023-02-21-raspios-bullseye-armhf.img.xz)
 
-   We cannot use the latest as updates to Linux kernel v5 have broken the I2S sub-system.
-
    Then, install the Raspberry Pi Imager on a host computer. Raspberry Pi Imager is available [here](https://www.raspberrypi.org/software/)
 
    Run the Raspberry Pi Imager, and select the 'CHOOSE OS' button. Scroll to the bottom of the displayed list, and select "Use custom".
@@ -63,17 +61,32 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
 2. Connect up the keyboard, mouse, speakers and display to the Raspberry Pi and power up the system. Refer to the **Getting Started Guide** for you platform.
 
-   **DO NOT** follow the prompt to "Update Software" on the system. Set up the locale, username, password and a network connection, but **DO NOT** update the software on the Raspberry Pi. This will update the kernel, and then the audio sub-system will not work.
-
-**_NOTE:_** Headless installation forces an upgrade of the software, so it cannot be used for this setup.
+   Set up the locale, username, password, network connection and update the software on the Raspberry Pi.
 
 **_NOTE:_** Host applications and scripts used by the XMOS products support only 32-bit Raspbian systems.
 
-3. On the Raspberry Pi, clone the Github repository below:
+3. Force the Raspberry Pi to use 32-bit kernels, by typing:
+
+   ```
+   sudo sh -c "echo 'arm_64bit=0' >> /boot/config.txt"
+   sudo reboot
+   ```
+
+   and wait for the Raspberry Pi to reboot.
+
+4. Update the Raspberry Pi package list and upgrade the packages to the latest version:
+
+    ```
+    sudo apt-get update
+    sudo apt-get upgrade
+    sudo reboot
+    ```
+
+5. On the Raspberry Pi, clone the Github repository below:
 
    ```git clone https://github.com/xmos/vocalfusion-rpi-setup```
 
-4. For VocalFusion devices, run the installation script as follows:
+6. For VocalFusion devices, run the installation script as follows:
 
    ```./setup.sh xvf3100```
 
@@ -123,7 +136,7 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
    Wait for the script to complete the installation. This can take several minutes.
 
-5. Reboot the Raspberry Pi.
+7. Reboot the Raspberry Pi.
 
 ## Important note on clocks
 

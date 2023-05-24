@@ -297,10 +297,10 @@ popd > /dev/null
 fi
 
 # Setup the crontab to copy the .asoundrc file at reboot
-# Delay the action by 10 seconds to allow the host to boot up
+# Delay the action to allow the host to boot up
 # This is needed to address the known issue in Raspian Buster:
 # https://forums.raspberrypi.com/viewtopic.php?t=295008
-echo "@reboot sleep 15 && cp $ASOUNDRC_TEMPLATE ~/.asoundrc" >> $crontab_file
+echo "@reboot sleep 20 && cp $ASOUNDRC_TEMPLATE ~/.asoundrc" >> $crontab_file
 
 # Update crontab
 crontab $crontab_file
