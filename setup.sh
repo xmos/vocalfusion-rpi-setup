@@ -107,18 +107,33 @@ esac
 
 # Disable the built-in audio output so there is only one audio
 # device in the system
-sudo sed -i -e 's/^dtparam=audio=on/#dtparam=audio=on/' /boot/config.txt
+sudo sed -i -e 's/^dtparam=audio=on/#dtparam=audio=on/' /boot/firmware/config.txt
 
 # Enable the i2s device tree
-sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on/' /boot/config.txt
+case $I2S_MODE in
+  master)
+    dtc -@ -H epapr -O dtb -o $RPI_SETUP_DIR/overlay/i2s-master-enable.dtbo -Wno-unit_address_vs_reg $RPI_SETUP_DIR/overlay/i2s-master-enable.dts
+    sudo mv $RPI_SETUP_DIR/overlay/i2s-master-enable.dtbo /boot/firmware/overlays/
+    sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on\ndtoverlay=i2s-master-enable/' /boot/firmware/config.txt
+    ;;
+  slave)
+    dtc -@ -H epapr -O dtb -o $RPI_SETUP_DIR/overlay/i2s-slave-enable.dtbo -Wno-unit_address_vs_reg $RPI_SETUP_DIR/overlay/i2s-slave-enable.dts
+    sudo mv $RPI_SETUP_DIR/overlay/i2s-slave-enable.dtbo /boot/firmware/overlays/
+    sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on\ndtoverlay=i2s-slave-enable/' /boot/firmware/config.txt
+    ;;
+  *)
+    echo Error: I2S mode not known for XMOS device $XMOS_DEVICE.
+    exit 1
+  ;;
+esac
 
 # Enable the I2C device tree
 sudo raspi-config nonint do_i2c 1
 sudo raspi-config nonint do_i2c 0
 
 # Set the I2C baudrate to 100k
-sudo sed -i -e '/^dtparam=i2c_arm_baudrate/d' /boot/config.txt
-sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on\ndtparam=i2c_arm_baudrate=100000/' /boot/config.txt
+sudo sed -i -e '/^dtparam=i2c_arm_baudrate/d' /boot/firmware/config.txt
+sudo sed -i -e 's/dtparam=i2c_arm=on$/dtparam=i2c_arm=on\ndtparam=i2c_arm_baudrate=100000/' /boot/firmware/config.txt
 
 # Enable the SPI support
 sudo raspi-config nonint do_spi 1
@@ -155,7 +170,9 @@ for package in $packages; do
 done
 # Build I2S kernel module
 PI_MODEL=$(cat /proc/device-tree/model | awk '{print $3}')
-if [[ $PI_MODEL -eq 4 ]]; then
+if [[ $PI_MODEL -eq 5 ]]; then
+  I2S_MODULE_CFLAGS="-DRPI_5"
+elif [[ $PI_MODEL -eq 4 ]]; then
   I2S_MODULE_CFLAGS="-DRPI_4B"
 fi
 

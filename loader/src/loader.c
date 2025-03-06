@@ -21,7 +21,13 @@ N.B. playback vs capture is determined by the codec choice
 
 void device_release_callback(struct device *dev) { /* do nothing */ };
 
-#ifdef RPI_4B
+#if defined(RPI_5)
+    #ifdef I2S_MASTER
+        #define CARD_PLATFORM_STR   "1f000a0000.i2s"
+    #else
+        #define CARD_PLATFORM_STR   "1f000a4000.i2s"
+    #endif
+#elif defined(RPI_4B)
     #define CARD_PLATFORM_STR   "fe203000.i2s"
 #else
     #define CARD_PLATFORM_STR   "3f203000.i2s"
