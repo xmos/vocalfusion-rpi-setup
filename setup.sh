@@ -251,7 +251,12 @@ if [[ -n "$I2S_MODE" ]]; then
 
   I2S_NAME=i2s_$I2S_MODE
   I2S_MODULE=$RPI_SETUP_DIR/loader/$I2S_NAME/${I2S_NAME}_loader.ko
-  echo "sudo insmod $I2S_MODULE"                            >> $i2s_driver_script
+  echo "if sudo insmod $I2S_MODULE ; then"                  >> $i2s_driver_script
+  echo "  pushd $I2S_BUILD_DIR > /dev/null"                 >> $i2s_driver_script
+  echo "  eval $CMD"                                        >> $i2s_driver_script
+  echo "  popd > /dev/null"                                 >> $i2s_driver_script
+  echo "  sudo insmod $I2S_MODULE"                          >> $i2s_driver_script
+  echo "fi"                                                 >> $i2s_driver_script
 
   echo "# Run Alsa at startup so that alsamixer configures" >> $i2s_driver_script	
   echo "arecord -d 1 > /dev/null 2>&1"                      >> $i2s_driver_script	
