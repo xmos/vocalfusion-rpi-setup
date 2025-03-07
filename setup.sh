@@ -114,11 +114,15 @@ case $I2S_MODE in
   master)
     dtc -@ -H epapr -O dtb -o $RPI_SETUP_DIR/overlay/i2s-master-enable.dtbo -Wno-unit_address_vs_reg $RPI_SETUP_DIR/overlay/i2s-master-enable.dts
     sudo mv $RPI_SETUP_DIR/overlay/i2s-master-enable.dtbo /boot/firmware/overlays/
+    sudo sed -i -e 's/dtparam=i2s=on/#dtparam=i2s=on/' /boot/firmware/config.txt
+    sudo sed -i -e '/^dtoverlay=i2s-/d' /boot/firmware/config.txt
     sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on\ndtoverlay=i2s-master-enable/' /boot/firmware/config.txt
     ;;
   slave)
     dtc -@ -H epapr -O dtb -o $RPI_SETUP_DIR/overlay/i2s-slave-enable.dtbo -Wno-unit_address_vs_reg $RPI_SETUP_DIR/overlay/i2s-slave-enable.dts
     sudo mv $RPI_SETUP_DIR/overlay/i2s-slave-enable.dtbo /boot/firmware/overlays/
+    sudo sed -i -e 's/dtparam=i2s=on/#dtparam=i2s=on/' /boot/firmware/config.txt
+    sudo sed -i -e '/^dtoverlay=i2s-/d' /boot/firmware/config.txt
     sudo sed -i -e 's/#dtparam=i2s=on/dtparam=i2s=on\ndtoverlay=i2s-slave-enable/' /boot/firmware/config.txt
     ;;
   *)
