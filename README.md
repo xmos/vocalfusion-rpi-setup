@@ -48,12 +48,12 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
 ## Setup
 
-1. First, obtain the required version of the Raspberry Pi operating system, which is available [here](https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2023-02-22/2023-02-21-raspios-bullseye-armhf.img.xz)
+1. First, obtain the required version of the Raspberry Pi operating system, which is available [here](https://downloads.raspberrypi.com/raspios_arm64/images/raspios_arm64-2024-11-19/2024-11-19-raspios-bookworm-arm64.img.xz)
 
    Then, install the Raspberry Pi Imager on a host computer. Raspberry Pi Imager is available [here](https://www.raspberrypi.org/software/)
 
    Run the Raspberry Pi Imager, and select the 'CHOOSE OS' button. Scroll to the bottom of the displayed list, and select "Use custom".
-   Then select the file downloaded above (2023-02-21-raspios-bullseye-armhf.img.xz) and select "Open". The archive file does not have to be unzipped, the imager software will do that.
+   Then select the file downloaded above (2024-11-19-raspios-bookworm-arm64.img.xz) and select "Open". The archive file does not have to be unzipped, the imager software will do that.
 
    Select the CHOOSE SD CARD button to which to download the image, and then select the "WRITE" button.
 
@@ -63,18 +63,7 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
    Set up the locale, username, password, network connection and update the software on the Raspberry Pi.
 
-**_NOTE:_** Host applications and scripts used by the XMOS products support only 32-bit Raspbian systems.
-
-3. Force the Raspberry Pi to use 32-bit kernels, by typing:
-
-   ```
-   sudo sh -c "echo 'arm_64bit=0' >> /boot/config.txt"
-   sudo reboot
-   ```
-
-   and wait for the Raspberry Pi to reboot.
-
-4. Update the Raspberry Pi package list and upgrade the packages to the latest version:
+3. Update the Raspberry Pi package list and upgrade the packages to the latest version:
 
     ```
     sudo apt-get update
@@ -82,11 +71,11 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
     sudo reboot
     ```
 
-5. On the Raspberry Pi, clone the Github repository below:
+4. On the Raspberry Pi, clone the Github repository below:
 
    ```git clone https://github.com/xmos/vocalfusion-rpi-setup```
 
-6. For VocalFusion devices, run the installation script as follows:
+5. For VocalFusion devices, run the installation script as follows:
 
    ```./setup.sh xvf3100```
 
@@ -136,7 +125,7 @@ For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
 
    Wait for the script to complete the installation. This can take several minutes.
 
-7. Reboot the Raspberry Pi.
+6. Reboot the Raspberry Pi.
 
 ## Important note on clocks
 
