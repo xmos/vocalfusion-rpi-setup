@@ -1,1 +1,4 @@
 .*.swp
+**/*.dtbo
+resources/clk_dac_setup/setup_mclk
+resources/clk_dac_setup/setup_arbitrary_i2s_rate

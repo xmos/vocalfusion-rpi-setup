@@ -1,156 +1,81 @@
 # xCORE VocalFusion Raspberry Pi Setup
 
-This repository provides a simple-to-use automated script to configure the Raspberry Pi to use **xCORE VocalFusion** for audio.
+This repository provides a simple-to-use automated script to configure a Raspberry Pi to use **xCORE VocalFusion** for audio.
 
-This setup will perform the following operations:
+The setup script will:
+- Disable built-in audio
+- Enable I2S, I2C (100k baud), and SPI interfaces
+- Update the Raspberry Pi and install required packages
 
-- enable the I2S, I2C and SPI interfaces
-- install the Raspberry Pi kernel headers
-- install the required packages
-- compile the I2S drivers
-- update the asoundrc file to support I2S devices
-- add a cron job to load the I2S drivers at boot up
+For INT devices, it will also:
+- Install a devicetree overlay
+- Generate and install an ALSA configuration specific to the XMOS device
+- Create scripts to set up the XMOS device on boot (set up I2S, IO Expander, DAC, and MCLK if necessary)
+- Generate and replace the user's crontab with one that runs those scripts at boot
 
-For XVF3510-INT devices these actions will be done as well:
+For UA devices, it will instead:
+- Add udev rules allowing non-privileged access to the USB interface
 
-- configure MCLK at 12288kHz from pin 7 (BCM 4)
-- configure I2S BCLK at 3072kHz from pin 12 (BCM 18)
-- update the alias for Audacity
-- update the asoundrc file to support I2S devices
-- add a cron job to reset the device at boot up
-- add a cron job to configure the DAC at boot up
+Finally, the setup will prompt you to restart your Raspberry Pi, this is required to ensure all interfaces are enabled.
 
-For XVF361x-INT devices these actions will be done as well:
+## Compatibility
 
-- configure MCLK at 12288kHz from pin 7 (BCM 4)
-- configure I2S BCLK at 3072kHz from pin 12 (BCM 18)
-- update the alias for Audacity
-- update the asoundrc file to support I2S devices
-- add a cron job to reset the device at boot up
-- add a cron job to configure the DAC at boot up
+|                        | Raspberry Pi 4 | Raspberry Pi 5 |
+|------------------------|----------------|----------------|
+| XVF3610-INT            | Yes            | No [^1]        |
+| XVF3610-UA             | Yes            | Yes            |
+| XVF3800-INTDEV-EXTMCLK | Yes            | No [^1]        |
+| XVF3800-INTDEV         | Yes            | Yes            |
+| XVF3800-UA             | Yes            | Yes            |
 
-For XVF3800(DEFAULT) devices these actions will be done as well:
+[^1]: These configurations are not supported due to missing Raspberry Pi documentation, see [here](https://github.com/raspberrypi/documentation/issues/3285).
 
-- configure I2S BCLK at 3072kHz from pin 12 (BCM 18)
-- update the alias for Audacity
-- update the asoundrc file to support I2S devices
-- add a cron job to reset the device at boot up
-- add a cron job to configure the IO expander at boot up
-
-For XVF3800-extmclk devices these actions will be done as well:
-- configure MCLK at 12288kHz from pin 7 (BCM 4) and drive to XVF3800
-
-
-For XVF3510-UA and XVF361x-UA devices these actions will be done as well:
-
-- update the asoundrc file to support USB devices
-- update udev rules so that root privileges are not needed to access USB control interface
+> [!NOTE]
+> For cards not listed here, use [v5.8.0](https://github.com/xmos/vocalfusion-rpi-setup/tree/release/v5.8.0).
 
 ## Setup
 
-1. First, obtain the required version of the Raspberry Pi operating system, which is available [here](https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2023-02-22/2023-02-21-raspios-bullseye-armhf.img.xz)
-
-   Then, install the Raspberry Pi Imager on a host computer. Raspberry Pi Imager is available [here](https://www.raspberrypi.org/software/)
-
-   Run the Raspberry Pi Imager, and select the 'CHOOSE OS' button. Scroll to the bottom of the displayed list, and select "Use custom".
-   Then select the file downloaded above (2023-02-21-raspios-bullseye-armhf.img.xz) and select "Open". The archive file does not have to be unzipped, the imager software will do that.
-
-   Select the CHOOSE SD CARD button to which to download the image, and then select the "WRITE" button.
-
-   When prompted, remove the written SD card and insert it into the Raspberry Pi.
-
-2. Connect up the keyboard, mouse, speakers and display to the Raspberry Pi and power up the system. Refer to the **Getting Started Guide** for you platform.
-
-   Set up the locale, username, password, network connection and update the software on the Raspberry Pi.
-
-**_NOTE:_** Host applications and scripts used by the XMOS products support only 32-bit Raspbian systems.
-
-3. Force the Raspberry Pi to use 32-bit kernels, by typing:
-
-   ```
-   sudo sh -c "echo 'arm_64bit=0' >> /boot/config.txt"
-   sudo reboot
+1. First, install the Raspberry Pi imager on a host computer. This is available [here](https://www.raspberrypi.org/software) or through your package manager.
+   
+   Windows:
+   ```powershell
+   winget install --id=RaspberryPiFoundation.RaspberryPiImager -e
    ```
 
-   and wait for the Raspberry Pi to reboot.
+   Ubuntu:
+   ```bash
+   sudo apt install rpi-imager
+   ```
 
-4. Update the Raspberry Pi package list and upgrade the packages to the latest version:
+   Run the imager (may require `root` privileges), select the Raspberry Pi you are using, Bookworm and Bullseye are both supported.
 
-    ```
-    sudo apt-get update
-    sudo apt-get upgrade
-    sudo reboot
-    ```
+   Then, choose your SD card and write to it. When prompted, remove the SD card and insert it into the Raspberry Pi.
 
-5. On the Raspberry Pi, clone the Github repository below:
+2. Connect peripherals (keyboard, mouse, speakers/headphones, and display recommended) and connect your XMOS device as a Pi hat. For UA devices, connect the Pi to the XMOS device via USB.
 
-   ```git clone https://github.com/xmos/vocalfusion-rpi-setup```
+   Refer to the [Getting Started Guide](https://www.raspberrypi.com/documentation/computers/getting-started.html) for your Raspberry Pi.
 
-6. For VocalFusion devices, run the installation script as follows:
+3. On the Raspberry Pi, clone this GitHub repository:
 
-   ```./setup.sh xvf3100```
+   ```bash
+   git clone https://github.com/xmos/vocalfusion-rpi-setup
+   ```
 
-   For VocalFusion Stereo devices, run the installation script as follows:
+4. Simply run the setup script for your device. Run `./setup.sh -h` for full usage.
 
-   ```./setup.sh xvf3500```
+   For example, an XVF3800 in intdev configuration with a 48kHz sample rate (the default sample rate):
+   ```bash
+   ./setup.sh xvf3800-intdev
+   ```
 
-   For XVF3510 devices, run the installation script as follows:
+   or, for an XVF3800 in EXTMCLK configuration with 16kHz sample rate:
+   ```bash
+   ./setup.sh xvf3800-intdev-extmclk -r16k
+   ```
 
-   ```./setup.sh xvf3510```
+   For more options, run:
+   ```bash
+   ./setup.sh --help
+   ```
 
-   For XVF3600 I2S master devices, run the installation script as follows:
-
-   ```./setup.sh xvf3600-master```
-
-   For XVF3600 I2S slave devices, run the installation script as follows:
-
-   ```./setup.sh xvf3600-slave```
-
-   For XVF3610-UA devices, run the installation script as follows:
-
-   ```./setup.sh xvf3610-ua```
-
-   For XVF3610-INT devices, run the installation script as follows:
-
-   ```./setup.sh xvf3610-int```
-
-   For XVF3615-UA devices, run the installation script as follows:
-
-   ```./setup.sh xvf3615-ua```
-
-   For XVF3615-INT devices, run the installation script as follows:
-
-   ```./setup.sh xvf3615-int```
-
-   For XVF3800-INTDEV devices, run the installation script as follows:
-
-   ```./setup.sh xvf3800-intdev```
-
-   For XVF3800-INTHOST devices, run the installation script as follows:
-
-   ```./setup.sh xvf3800-inthost```
-
-  For XVF3800-INTDEV-EXTMCLK devices, run the installation script as follows:
-
-   ```./setup.sh xvf3800-intdev-extmclk```
-
-   Wait for the script to complete the installation. This can take several minutes.
-
-7. Reboot the Raspberry Pi.
-
-## Important note on clocks
-
-The I2S/PCM driver that is provided with raspbian does not support an MCLK output. However the 
-driver does have full ability to set the BCLK and LRCLK correctly for a given sample rate. As 
-the driver does not know about the MCLK it is likely to choose dividers for the clocks generators
-which are not phase locked to the MCLK. The script in this repo gets around this problem by 
-configuring the i2s driver to a certain frequency and then overriding the clock registers to force
-a phase locked frequency.
-
-This will work until a different sample rate is chosen by an application, then the I2S driver will
-write it's own value to the clocks and the MCLK will no longer be phase locked. To solve this problem
-the following steps must be taken before connecting an XVF device with a different sample rate:
-
-1. Take a short recording at the new sample rate: `arecord -c2 -fS32_LE -r{sample_rate} -s1 -Dhw:sndrpisimplecar`
-2. For 48kHz `./resources/clk_dac_setup/setup_blk`, for 16kHz `./resources/clk_dac_setup/setup_blk 16000`
-
+   You will be prompted to restart your Raspberry Pi, this will apply options modified in the Raspberry Pi `config.txt` and any ALSA configuration.

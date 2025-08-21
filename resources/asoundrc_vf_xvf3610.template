@@ -1,0 +1,171 @@
+#
+# Playback device.
+# plug - rate and format conversion
+# softvol - control for alsamixer
+# dmix - allow device to be shared
+#
+pcm.XMOS_I2S_Playback {
+    type plug
+    slave.pcm {
+        type softvol
+        slave.pcm {
+            type dmix
+            ipc_key 1024
+            ipc_perm 0666
+            slave {
+                pcm {
+                    type hw
+                    card "XMOSDevice"
+                    device 0
+                }
+                rate {{rate}}
+                format S32_LE
+                channels 2
+            }
+        }
+        control {
+            name "XMOS Playback Volume"
+            card "XMOSDevice"
+        }
+    }
+    hint {
+        show on
+        description "XMOS I2S Playback Device"
+    }
+}
+
+#
+# Comms & ASR recording.
+#
+pcm.XMOS_I2S_ASR_Comms_LR {
+    type plug
+    route_policy duplicate
+    slave.pcm {
+        type softvol
+        slave.pcm {
+            type dsnoop
+            ipc_key 2048
+            ipc_perm 0666
+            slave {
+                pcm {
+                    type hw
+                    card "XMOSDevice" 
+                    device 1
+                }
+                rate {{rate}}
+                format S32_LE
+                channels 2
+            }
+        }
+        control {
+            name "XMOS ASR+Comms Capture Volume"
+            card "XMOSDevice"
+        }
+    }
+    hint {
+        show on
+        description "XMOS I2S ASR and Comms Capture (Stereo)"
+    }
+}
+
+#
+# ASR recording
+#
+pcm.XMOS_I2S_ASR_L {
+    type plug
+    route_policy duplicate
+    slave.pcm {
+        type softvol
+        slave.pcm {
+            type route
+            slave.pcm {
+                type dsnoop
+                ipc_key 2048
+                ipc_perm 0666
+                slave {
+                    pcm {
+                        type hw
+                        card "XMOSDevice" 
+                        device 1
+                    }
+                    rate {{rate}}
+                    format S32_LE
+                    channels 2
+                }
+            }
+            slave.channels 2
+            ttable.0.0 1
+        }
+        control {
+            name "XMOS ASR Capture Volume"
+            card "XMOSDevice"
+        }
+    }
+    hint {
+        show on
+        description "XMOS I2S ASR Capture"
+    }
+}
+
+#
+# Comms recording
+#
+pcm.XMOS_I2S_Comms_R {
+    type plug
+    route_policy duplicate
+    slave.pcm {
+        type softvol
+        slave.pcm {
+            type route
+            slave.pcm {
+                type dsnoop
+                ipc_key 2048
+                ipc_perm 0666
+                slave {
+                    pcm {
+                        type hw
+                        card "XMOSDevice" 
+                        device 1
+                    }
+                    rate {{rate}}
+                    format S32_LE
+                    channels 2
+                }
+            }
+            slave.channels 2
+            ttable.0.1 1
+        }
+        control {
+            name "XMOS Comms Capture Volume"
+            card "XMOSDevice"
+        }
+    }
+    hint {
+        show on
+        description "XMOS I2S Comms Capture"
+    }
+}
+
+#
+# Default devices
+#
+pcm.!default {
+    type asym
+    playback.pcm "XMOS_I2S_Playback"
+    capture.pcm "XMOS_I2S_ASR_L"
+}
+
+#
+# Control mixer
+#
+ctl.!default {
+    type hw
+    card "XMOSDevice"
+}
+
+#
+# Global defaults
+#
+defaults.pcm.rate_converter "samplerate_best"
+defaults.pcm.dmix.rate {{rate}}
+defaults.pcm.dsnoop.rate {{rate}}

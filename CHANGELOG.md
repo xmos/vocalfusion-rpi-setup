@@ -1,5 +1,17 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 6.0.0
+
+  * Remove support for xvf3100, xvf3500, xvf3510, xvf3600, and xvf3615 (may work with other board configurations)
+  * Rewrote `setup.sh`, the API has changed, see `setup.sh --help` for usage
+  * Added support for xvf3800-ua
+  * Added support for 64-bit Bookworm Raspberry Pi OS
+  * Added partial support for Pi 5, see `README.md` for compatibility
+  * Remove loader driver in favour of device tree overlays
+  * Cleaned up MCLK setup for Pi 4 and below
+  * Rewrote ALSA configurations for new device tree overlays
+  * Enable configuration of sample rate via `setup.sh`
+
 ## 5.8.0
 
   * Update instructions to allow software update of Raspbian packages

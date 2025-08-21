@@ -1,0 +1,92 @@
+// Device tree overlay for XMOS I2S audio devices
+/dts-v1/;
+/plugin/;
+
+/ {
+    // 2835 for RPi 4
+    // 2712 for RPi 5
+    compatible = "brcm,bcm2835", "brcm,bcm2712";
+
+    fragment@0 {
+        target = <&sound>;
+        __overlay__ {
+            compatible = "simple-audio-card";
+            simple-audio-card,name = "XMOSDevice";
+            status = "okay";
+
+            // Capture
+            cap: simple-audio-card,dai-link@0 {
+                format = "i2s";
+
+                // RPi as master
+                bitclock-master = <&cap_cpu>;
+                frame-master = <&cap_cpu>;
+                
+                cap_cpu: cpu {
+                    sound-dai = <&i2s>;
+                    
+                    // Stereo
+                    dai-tdm-slot-num = <2>;
+                    // 32-Bit
+                    dai-tdm-slot-width = <32>;
+                };
+
+                cap_codec: codec {
+                    sound-dai = <&c_codec>;
+                };
+            };
+
+            // Playback
+            play: simple-audio-card,dai-link@1 {
+                format = "i2s";
+
+                // RPi as master
+                bitclock-master = <&play_cpu>;
+                frame-master = <&play_cpu>;
+                
+                play_cpu: cpu {
+                    sound-dai = <&i2s>;
+                    
+                    // Stereo
+                    dai-tdm-slot-num = <2>;
+                    // 32-Bit
+                    dai-tdm-slot-width = <32>;
+                };
+
+                play_codec: codec {
+                    sound-dai = <&p_codec>;
+                };
+            };
+        };
+    };
+
+    fragment@1 {
+        target-path = "/";
+        __overlay__ {
+            // Uses S/PDIF codec as a generic I2S driver.
+            c_codec: spdif-receiver {
+                compatible = "linux,spdif-dir";
+                status = "okay";
+                #address-cells = <0>;
+                #size-cells = <0>;
+                #sound-dai-cells = <0>;
+            };
+
+            p_codec: spdif-transmitter {
+                compatible = "linux,spdif-dit";
+                status = "okay";
+                #address-cells = <0>;
+                #size-cells = <0>;
+                #sound-dai-cells = <0>;
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&i2s>;
+        __overlay__ {
+            status = "okay";
+            #sound-dai-cells = <0>;
+        };
+    };
+};
