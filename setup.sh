@@ -322,23 +322,25 @@ else
     info 'Skipping package install as --no-packages used.'
 fi
 
-info 'Checking required packages are installed.'
+if [[ -z "$no_packages" ]]; then
+    info 'Checking required packages are installed.'
 
-# Check for failed package installations
-for package in ${packages[@]}; do
-    debug "Checking $package..."
-    if ! dpkg -s $package &>/dev/null; then
-        failed_packages+=($package)
-        warn "Package $package failed to install."
+    # Check for failed package installations
+    for package in ${packages[@]}; do
+        debug "Checking $package..."
+        if ! dpkg -s $package &>/dev/null; then
+            failed_packages+=($package)
+            warn "Package $package failed to install."
+        fi
+    done
+
+    # Output failed packages
+    if (( ${#failed_packages[@]} > 0 )); then
+        error "Failed to install the following packages after $max_install_attempts attempts:"
+        printf '         - %s\n' "${failed_packages[@]}"
+        hint 'Please check network connection and package names, then try again.'
+        exit 1
     fi
-done
-
-# Output failed packages
-if (( ${#failed_packages[@]} > 0 )); then
-    error "Failed to install the following packages after $max_install_attempts attempts:"
-    printf '         - %s\n' "${failed_packages[@]}"
-    hint 'Please check network connection and package names, then try again.'
-    exit 1
 fi
 
 # Install XMOS devicetree overlay
