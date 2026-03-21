@@ -26,6 +26,7 @@ Finally, the setup will prompt you to restart your Raspberry Pi, this is require
 | XVF3610-UA             | Yes            | Yes            |
 | XVF3800-INTDEV-EXTMCLK | Yes            | No [^1]        |
 | XVF3800-INTDEV         | Yes            | Yes            |
+| XVF3800-INTDEV-MASTER  | Yes            | Yes            |
 | XVF3800-UA             | Yes            | Yes            |
 
 [^1]: These configurations are not supported due to missing Raspberry Pi documentation, see [here](https://github.com/raspberrypi/documentation/issues/3285).
@@ -66,6 +67,11 @@ Finally, the setup will prompt you to restart your Raspberry Pi, this is require
    For example, an XVF3800 in intdev configuration with a 48kHz sample rate (the default sample rate):
    ```bash
    ./setup.sh xvf3800-intdev
+   ```
+
+   or, for an XVF3800 in I2S master mode (RPi as clock slave):
+   ```bash
+   ./setup.sh xvf3800-intdev-master
    ```
 
    or, for an XVF3800 in EXTMCLK configuration with 16kHz sample rate:

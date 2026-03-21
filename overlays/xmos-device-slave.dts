@@ -1,0 +1,97 @@
+// Device tree overlay for XMOS I2S audio devices — RPi as I2S clock slave
+//
+// This overlay is for configurations where the XVF3800 provides BCLK/LRCLK
+// (i.e., XVF3800 is the I2S master). Uses the standard &i2s node which can
+// accept external clocks on Raspberry Pi 4.
+//
+// For RPi 5, use xmos-device-slave-rpi5.dts instead (i2s_clk_consumer).
+/dts-v1/;
+/plugin/;
+
+/ {
+    // 2835 for RPi 4
+    compatible = "brcm,bcm2835";
+
+    fragment@0 {
+        target = <&sound>;
+        __overlay__ {
+            compatible = "simple-audio-card";
+            simple-audio-card,name = "XMOSDevice";
+            status = "okay";
+
+            // Capture
+            cap: simple-audio-card,dai-link@0 {
+                format = "i2s";
+
+                // XVF3800 as master (RPi as slave)
+                bitclock-master = <&cap_codec>;
+                frame-master = <&cap_codec>;
+
+                cap_cpu: cpu {
+                    sound-dai = <&i2s>;
+
+                    // Stereo
+                    dai-tdm-slot-num = <2>;
+                    // 32-Bit
+                    dai-tdm-slot-width = <32>;
+                };
+
+                cap_codec: codec {
+                    sound-dai = <&c_codec>;
+                };
+            };
+
+            // Playback
+            play: simple-audio-card,dai-link@1 {
+                format = "i2s";
+
+                // XVF3800 as master (RPi as slave)
+                bitclock-master = <&play_codec>;
+                frame-master = <&play_codec>;
+
+                play_cpu: cpu {
+                    sound-dai = <&i2s>;
+
+                    // Stereo
+                    dai-tdm-slot-num = <2>;
+                    // 32-Bit
+                    dai-tdm-slot-width = <32>;
+                };
+
+                play_codec: codec {
+                    sound-dai = <&p_codec>;
+                };
+            };
+        };
+    };
+
+    fragment@1 {
+        target-path = "/";
+        __overlay__ {
+            // Uses S/PDIF codec as a generic I2S driver.
+            c_codec: spdif-receiver {
+                compatible = "linux,spdif-dir";
+                status = "okay";
+                #address-cells = <0>;
+                #size-cells = <0>;
+                #sound-dai-cells = <0>;
+            };
+
+            p_codec: spdif-transmitter {
+                compatible = "linux,spdif-dit";
+                status = "okay";
+                #address-cells = <0>;
+                #size-cells = <0>;
+                #sound-dai-cells = <0>;
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&i2s>;
+        __overlay__ {
+            status = "okay";
+            #sound-dai-cells = <0>;
+        };
+    };
+};

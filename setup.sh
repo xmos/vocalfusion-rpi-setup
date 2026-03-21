@@ -4,7 +4,7 @@
 rpi_setup_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
 
 # Valid/supported device configurations
-valid_xmos_devices=(xvf3800-intdev-extmclk xvf3800-intdev xvf3800-ua xvf3610-int xvf3610-ua)
+valid_xmos_devices=(xvf3800-intdev-extmclk xvf3800-intdev xvf3800-intdev-master xvf3800-ua xvf3610-int xvf3610-ua)
 
 # Comma and space separate the devices
 printf -v devices_display_string '%s, ' "${valid_xmos_devices[@]}"
@@ -173,6 +173,13 @@ case $xmos_device in
     xvf3800-intdev)
         i2s_mode=master
         io_exp_and_dac_setup=y
+        asoundrc_template=$rpi_setup_dir/resources/asoundrc_vf
+        ;;
+    xvf3800-intdev-master)
+        # XVF3800 is I2S master, RPi is slave
+        # No clock setup needed (XVF3800 provides BCLK/LRCLK)
+        i2s_mode=slave
+        overlay_mode=slave
         asoundrc_template=$rpi_setup_dir/resources/asoundrc_vf
         ;;
     xvf3610-int)
@@ -345,8 +352,17 @@ fi
 
 # Install XMOS devicetree overlay
 if [[ -z "$usb_mode" ]]; then
+    # Detect RPi model for overlay selection
+    rpi_model_num=4
+    if [[ -f /proc/device-tree/model ]]; then
+        model_str=$(tr -d '\0' < /proc/device-tree/model)
+        if [[ "$model_str" == *"Raspberry Pi 5"* ]]; then
+            rpi_model_num=5
+        fi
+    fi
+
     info 'Making and installing XMOS DTO.'
-    RPI_CONFIG_ROOT=$rpi_config_root make -C $rpi_setup_dir/overlays install
+    RPI_CONFIG_ROOT=$rpi_config_root OVERLAY_MODE=${overlay_mode:-master} RPI_MODEL=$rpi_model_num make -C $rpi_setup_dir/overlays install
 
     # Enable XMOS devicetree overlay
     info 'Enabling DTO now.'

@@ -1,5 +1,11 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## Unreleased
+
+  * Add `xvf3800-intdev-master` device type for XVF3800 in I2S master mode
+  * Add I2S slave devicetree overlays for RPi 4 and RPi 5
+  * Fix `--no-packages` flag causing false package validation failures
+
 ## 6.0.0
 
   * Remove support for xvf3100, xvf3500, xvf3510, xvf3600, and xvf3615 (may work with other board configurations)

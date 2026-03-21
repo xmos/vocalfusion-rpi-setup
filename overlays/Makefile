@@ -1,10 +1,26 @@
 RPI_CONFIG_ROOT ?= /boot
 
+# OVERLAY_MODE: master (default, RPi provides clocks) or slave (XVF3800 provides clocks)
+OVERLAY_MODE ?= master
+
+# RPI_MODEL: 4 (default) or 5 — selects the appropriate slave DTS
+RPI_MODEL ?= 4
+
+ifeq ($(OVERLAY_MODE),slave)
+  ifeq ($(RPI_MODEL),5)
+    DTS_SOURCE = xmos-device-slave-rpi5.dts
+  else
+    DTS_SOURCE = xmos-device-slave.dts
+  endif
+else
+  DTS_SOURCE = xmos-device.dts
+endif
+
 .PHONY: all
 all: xmos-device.dtbo
 
-xmos-device.dtbo: xmos-device.dts
-	dtc -@ -I dts -O dtb -o xmos-device.dtbo xmos-device.dts
+xmos-device.dtbo: $(DTS_SOURCE)
+	dtc -@ -I dts -O dtb -o xmos-device.dtbo $(DTS_SOURCE)
 
 install: xmos-device.dtbo
 	sudo cp xmos-device.dtbo ${RPI_CONFIG_ROOT}/overlays
