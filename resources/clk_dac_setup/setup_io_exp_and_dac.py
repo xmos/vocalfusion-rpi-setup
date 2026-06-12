@@ -53,12 +53,12 @@ def setup_io_expander(bus, args):
         # Configure pin directions. Setting to 1 means input, or Hi-Z. So anything not mentioned
         # below will be an output. Note reset, int and boot_sel NOT driven because they are set high in the mask
         # use DAC_RST_N and level shift OE as driven outputs
-        # Configure the mute pin as input only for XVF361x
+        # Configure the mute pin as input only for XVF361x/XVF3620
         if args.hw == "xvf3600":
             CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
                                  (1<<INT_N_PIN)     | \
                                  (1<<BOOT_SEL_PIN)
-        elif "xvf361" in args.hw:
+        elif "xvf361" in args.hw or "xvf362" in args.hw:
             CONFIGURATION_MASK = (1<<XVF_RST_N_PIN) | \
                                  (1<<INT_N_PIN)     | \
                                  (1<<BOOT_SEL_PIN)  | \
@@ -68,6 +68,7 @@ def setup_io_expander(bus, args):
         time.sleep(0.1)
 
         # Enable the interrupt on INT_N pin for XVF361x
+        # XVF3620 does not support an interrupt pin
         if "xvf361" in args.hw:
             # Interrupts are enabled by setting corresponding mask bits to logic 0
             INTERRUPT_MASK = 0xFF & ~(1<<INT_N_PIN)

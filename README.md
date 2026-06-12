@@ -24,6 +24,8 @@ Finally, the setup will prompt you to restart your Raspberry Pi, this is require
 |------------------------|----------------|----------------|
 | XVF3610-INT            | Yes            | No [^1]        |
 | XVF3610-UA             | Yes            | Yes            |
+| XVF3620-INT            | Yes            | No [^1]        |
+| XVF3620-UA             | Yes            | No             |
 | XVF3800-INTDEV-EXTMCLK | Yes            | No [^1]        |
 | XVF3800-INTDEV         | Yes            | Yes            |
 | XVF3800-UA             | Yes            | Yes            |
