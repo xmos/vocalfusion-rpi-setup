@@ -4,7 +4,7 @@
 rpi_setup_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
 
 # Valid/supported device configurations
-valid_xmos_devices=(xvf3800-intdev-extmclk xvf3800-intdev xvf3800-ua xvf3610-int xvf3610-ua)
+valid_xmos_devices=(xvf3800-intdev-extmclk xvf3800-intdev xvf3800-ua xvf3610-int xvf3610-ua xvf3620-int xvf3620-ua)
 
 # Comma and space separate the devices
 printf -v devices_display_string '%s, ' "${valid_xmos_devices[@]}"
@@ -175,13 +175,13 @@ case $xmos_device in
         io_exp_and_dac_setup=y
         asoundrc_template=$rpi_setup_dir/resources/asoundrc_vf
         ;;
-    xvf3610-int)
+    xvf3610-int|xvf3620-int)
         i2s_mode=master
         io_exp_and_dac_setup=y
         asoundrc_template=$rpi_setup_dir/resources/asoundrc_vf_xvf3610
         ext_mclk=y
         ;;
-    xvf3610-ua|xvf3800-ua)
+    xvf3610-ua|xvf3800-ua|xvf3620-ua)
         usb_mode=y
         i2s_mode=slave
         ;;

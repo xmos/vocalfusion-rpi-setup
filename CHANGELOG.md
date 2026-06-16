@@ -1,5 +1,9 @@
 # VocalFusion Raspberry Pi Setup Change Log
 
+## 6.1.0
+
+  * Added support for xvf3620-int and xvf3620-ua for a Pi 4
+
 ## 6.0.0
 
   * Remove support for xvf3100, xvf3500, xvf3510, xvf3600, and xvf3615 (may work with other board configurations)
